@@ -88,11 +88,20 @@ equal_weight_values = fix_equal_weight_calculation(price_array, TICKER_LIST)
 
 ### `push_changes.sh`
 
-This script helps push the changes to the GitHub repository.
+This script helps push the changes to a new branch in the GitHub repository.
 
 Usage:
 ```bash
 ./push_changes.sh
+```
+
+### `merge_to_master.sh`
+
+This script merges the changes directly to the master branch and pushes to origin.
+
+Usage:
+```bash
+./merge_to_master.sh
 ```
 
 ## How to Use the Fixed Notebooks
@@ -105,9 +114,16 @@ Usage:
 
 2. Open the patched notebooks (`*_patched.ipynb`) and run them from the beginning.
 
-3. To push the changes to the GitHub repository, run the `push_changes.sh` script:
+3. To push the changes to the GitHub repository, you have two options:
+
+   **Option 1:** Push to a new branch and create a pull request
    ```bash
    ./push_changes.sh
    ```
+   Then create a pull request on GitHub to merge the changes into the main branch.
 
-4. Create a pull request on GitHub to merge the changes into the main branch.
+   **Option 2:** Merge directly to master and push to origin
+   ```bash
+   ./merge_to_master.sh
+   ```
+   This will merge the changes directly to the master branch and push to origin.
