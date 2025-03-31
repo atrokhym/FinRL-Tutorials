@@ -5,9 +5,10 @@ pandas
 numpy
 pyfolio # For backtesting analysis
 matplotlib # For plotting
+optuna # For hyperparameter tuning
 
 # Add other dependencies as needed, e.g., for specific models or UI
-# stable-baselines3
+# stable-baselines3 # Already implicitly required by finrl? Check finrl setup.py if needed.
 # tensorflow
 # torch
 # streamlit / dash

@@ -13,6 +13,7 @@ SRC_DIR = os.path.join(PROJECT_ROOT, 'src')
 DATA_FETCHER_SCRIPT = os.path.join(SRC_DIR, 'data_fetcher', 'fetch_data.py')
 PREPROCESS_SCRIPT = os.path.join(SRC_DIR, 'preprocessing', 'preprocess_data.py')
 TRAIN_SCRIPT = os.path.join(SRC_DIR, 'training', 'train_agent.py')
+TUNE_SCRIPT = os.path.join(SRC_DIR, 'training', 'tune_agent.py') # Added tuning script path
 BACKTEST_SCRIPT = os.path.join(SRC_DIR, 'backtesting', 'backtest_agent.py')
 PAPERTRADE_SCRIPT = os.path.join(SRC_DIR, 'trading', 'alpaca_papertrader.py')
 
@@ -67,12 +68,13 @@ def main():
     parser = argparse.ArgumentParser(description="Alpaca Trading Agent Orchestrator")
     parser.add_argument(
         'mode',
-        choices=['fetch', 'preprocess', 'train', 'backtest', 'papertrade', 'all'],
+        choices=['fetch', 'preprocess', 'tune', 'train', 'backtest', 'papertrade', 'all'], # Added 'tune' mode
         help=(
             "Mode to run: "
             "'fetch' - Fetch raw data. "
             "'preprocess' - Preprocess raw data. "
             "'train' - Train the RL agent. "
+            "'tune' - Run hyperparameter tuning for the agent. " # Added help text for tune
             "'backtest' - Backtest the trained agent. "
             "'papertrade' - Start the paper trading agent (runs continuously). "
             "'all' - Run fetch, preprocess, train, and backtest sequentially."
@@ -113,11 +115,18 @@ def main():
             logging.error("Data preprocessing failed. Aborting.")
             if args.mode == 'all': sys.exit(1)
 
+    if args.mode == 'tune' or args.mode == 'all':
+        logging.info("--- Step: Tuning Agent Hyperparameters ---")
+        if not run_script(TUNE_SCRIPT, script_log_level):
+            logging.error("Agent tuning failed. Aborting.")
+            if args.mode == 'all': sys.exit(1)
+
     if args.mode == 'train' or args.mode == 'all':
         logging.info("--- Step: Training Agent ---")
         if not run_script(TRAIN_SCRIPT, script_log_level):
             logging.error("Agent training failed. Aborting.")
             if args.mode == 'all': sys.exit(1)
+
 
     if args.mode == 'backtest' or args.mode == 'all':
         logging.info("--- Step: Backtesting Agent ---")
@@ -126,7 +135,7 @@ def main():
             logging.error("Agent backtesting failed.")
             # Don't necessarily exit if 'all' mode, just report failure
 
-    if args.mode == 'papertrade':
+    if args.mode == 'papertrade' or args.mode == 'all':
         logging.info("--- Step: Starting Paper Trading Agent ---")
         # Note: The papertrade script runs indefinitely due to the schedule loop
         if not run_script(PAPERTRADE_SCRIPT, script_log_level): # Use default log level

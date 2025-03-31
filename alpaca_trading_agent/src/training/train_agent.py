@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import os
 import logging
+import json # Added for loading params
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv
 from stable_baselines3.common.logger import configure as sb3_configure_logger
@@ -82,27 +83,80 @@ logging.info(f"Configuring agent: {MODEL_ALGO}")
 log_path = os.path.join(RESULTS_DIR, 'logs', LOG_FILENAME)
 sb3_logger = sb3_configure_logger(log_path, ["stdout", "csv", "tensorboard"])
 
-# Define PPO model parameters (can be tuned)
-# See SB3 documentation for details: https://stable-baselines3.readthedocs.io/en/master/modules/ppo.html
+# --- Load Tuned Hyperparameters ---
+best_params_path = os.path.join(CONFIG_DIR, "best_ppo_params.json")
+tuned_params = {}
+try:
+    with open(best_params_path, 'r') as f:
+        tuned_params = json.load(f)
+    logging.info(f"Loaded best hyperparameters from: {best_params_path}")
+    # Remove metadata if it exists
+    tuned_params.pop('_study_name', None)
+    tuned_params.pop('_best_trial_number', None)
+    tuned_params.pop('_best_value', None)
+except FileNotFoundError:
+    logging.warning(f"Best parameters file not found at {best_params_path}. Using default parameters.")
+except json.JSONDecodeError:
+    logging.error(f"Error decoding JSON from {best_params_path}. Using default parameters.")
+except Exception as e:
+    logging.error(f"Error loading best parameters from {best_params_path}: {e}. Using default parameters.")
+
+# --- Define PPO model parameters ---
+# Start with default/fixed parameters
 model_params = {
     "policy": "MlpPolicy",
     "env": env_train,
-    "n_steps": 2048, # Number of steps to run for each environment per update
-    "batch_size": 64, # Minibatch size
-    "n_epochs": 10, # Number of epoch when optimizing the surrogate loss
-    "gamma": 0.99, # Discount factor
-    "gae_lambda": 0.95, # Factor for trade-off of bias vs variance for Generalized Advantage Estimator
-    "clip_range": 0.2, # Clipping parameter, it can be a function
-    "ent_coef": 0.0, # Entropy coefficient for the loss calculation
-    "vf_coef": 0.5, # Value function coefficient for the loss calculation
-    "max_grad_norm": 0.5, # The maximum value for the gradient clipping
-    "verbose": 1, # Verbosity level: 0=no output, 1=info, 2=debug
-    "seed": 42, # Seed for the pseudo random generators
-    "device": "auto" # "auto", "cpu", "cuda"
-    # Add other PPO parameters as needed
+    "n_epochs": 10,
+    "gae_lambda": 0.95,
+    "vf_coef": 0.5,
+    "max_grad_norm": 0.5,
+    "verbose": 1,
+    "seed": 42,
+    "device": "auto"
 }
 
+# Update with tuned parameters if loaded, otherwise use defaults from original script
+default_tuned = {
+    "n_steps": 2048,
+    "batch_size": 64,
+    "gamma": 0.99,
+    "clip_range": 0.2,
+    "ent_coef": 0.0,
+    "learning_rate": 3e-4 # Default PPO learning rate in SB3
+}
+
+for key, default_value in default_tuned.items():
+    model_params[key] = tuned_params.get(key, default_value) # Use tuned value or default
+
+# Log the final parameters being used
+logging.info("Using the following PPO parameters:")
+for key, value in model_params.items():
+    # Don't log the env object
+    if key != "env":
+        logging.info(f"  {key}: {value}")
+
+
+# Original hardcoded params for reference (now replaced by loaded/default logic above)
+# model_params_original = {
+#     "policy": "MlpPolicy",
+#     "env": env_train,
+#     "n_steps": 2048, # Number of steps to run for each environment per update
+#     "batch_size": 64, # Minibatch size
+#     "n_epochs": 10, # Number of epoch when optimizing the surrogate loss
+#     "gamma": 0.99, # Discount factor
+#     "gae_lambda": 0.95, # Factor for trade-off of bias vs variance for Generalized Advantage Estimator
+#     "clip_range": 0.2, # Clipping parameter, it can be a function
+#     "ent_coef": 0.0, # Entropy coefficient for the loss calculation
+#     "vf_coef": 0.5, # Value function coefficient for the loss calculation
+#     "max_grad_norm": 0.5, # The maximum value for the gradient clipping
+#     "verbose": 1, # Verbosity level: 0=no output, 1=info, 2=debug
+#     "seed": 42, # Seed for the pseudo random generators
+#     "device": "auto" # "auto", "cpu", "cuda"
+#     # Add other PPO parameters as needed
+# }
+
 if MODEL_ALGO == "PPO":
+    # Create model using the combined parameters
     model = PPO(**model_params)
     model.set_logger(sb3_logger)
 # Add elif blocks here for other algorithms like A2C, DDPG if needed
