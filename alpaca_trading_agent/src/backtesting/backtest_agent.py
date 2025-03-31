@@ -3,9 +3,10 @@
 import pandas as pd
 import numpy as np
 import os
+import argparse # Added for command-line arguments
 import logging
 from stable_baselines3 import PPO
-from stable_baselines3.common.vec_env import DummyVecEnv
+# from stable_baselines3.common.vec_env import DummyVecEnv # Not used directly here
 import pyfolio
 from finrl.plot import backtest_stats, backtest_plot, get_daily_return
 import matplotlib.pyplot as plt # Import matplotlib
@@ -22,9 +23,34 @@ import sys
 sys.path.insert(0, CONFIG_DIR)
 sys.path.insert(0, os.path.join(SRC_DIR, 'environment')) # To import trading_env
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# --- Argument Parsing and Logging Setup ---
+def setup_logging(level_str="INFO"):
+    """Configures logging for this script."""
+    level = getattr(logging, level_str.upper(), logging.INFO)
+    # Use a specific logger name for this module if desired, or configure root
+    # Using root logger for simplicity, matching main.py's approach
+    for handler in logging.root.handlers[:]:
+        logging.root.removeHandler(handler)
+    # Configure root logger first
+    logging.basicConfig(level=level, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', force=True)
+    # Set higher level for noisy libraries like matplotlib
+    logging.getLogger('matplotlib').setLevel(logging.WARNING)
+    logging.getLogger('matplotlib.font_manager').setLevel(logging.WARNING) # Be specific if needed
+    logging.info(f"Backtest Agent root logging configured to level: {level_str.upper()}") # Changed message slightly for clarity
+    logging.info(f"Matplotlib logging level set to WARNING to reduce verbosity.")
 
+
+parser = argparse.ArgumentParser(description="Alpaca Trading Agent Backtester")
+parser.add_argument(
+    '--log-level',
+    default='INFO',
+    choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+    help="Set the logging level for the backtesting script."
+)
+args = parser.parse_args()
+setup_logging(args.log_level) # Configure logging based on command-line arg
+
+# --- Load Settings and Environment ---
 try:
     import settings
     from trading_env import create_env # Import our environment creation function
@@ -76,8 +102,16 @@ except Exception as e:
 # --- Load Trained Model ---
 logging.info(f"Loading trained model from: {MODEL_PATH}")
 try:
-    model = PPO.load(MODEL_PATH, env=None) # Load structure, weights will be loaded
+    # We don't need to pass env here if we're only predicting
+    model = PPO.load(MODEL_PATH, env=None)
     logging.info("Model loaded successfully.")
+    # Get the list of tickers from the initial data in the env
+    # Ensure env_test_instance.data is populated after reset() or init
+    tickers = env_test_instance.data['tic'].unique().tolist()
+    logging.info(f"Tickers being backtested: {tickers}")
+    if len(tickers) != settings.STOCK_DIM:
+        logging.warning(f"Mismatch between loaded tickers ({len(tickers)}) and settings.STOCK_DIM ({settings.STOCK_DIM}).")
+
 except FileNotFoundError:
     logging.error(f"Trained model file not found: {MODEL_PATH}")
     logging.error("Please run the training script first.")
@@ -90,17 +124,66 @@ except Exception as e:
 logging.info("Starting backtesting loop...")
 account_value_list = []
 rewards_list = []
-actions_list = []
+actions_list = [] # Store actions
+state_memory = [] # Store state before action for debugging
 
 obs, info = env_test_instance.reset()
-account_value_list.append(env_test_instance.initial_amount) # Start with initial amount
+initial_value = env_test_instance.initial_amount
+account_value_list.append(initial_value) # Start with initial amount
+logging.debug(f"--- Backtest Start ---")
+logging.debug(f"Initial Observation Shape: {obs.shape}")
+# Avoid logging potentially huge observation arrays unless necessary
+# logging.debug(f"Initial Observation: {obs}")
+logging.debug(f"Initial Info: {info}")
+logging.debug(f"Starting Account Value: {initial_value:.2f}")
 
 terminated = False
 truncated = False # Gymnasium uses truncated
+step_count = 0
 
 while not (terminated or truncated):
+    step_count += 1
+    current_day_index = env_test_instance.day # Day index within the test data
+    current_date = env_test_instance.date_index[current_day_index]
+    logging.debug(f"\n--- Step {step_count} (Date: {current_date.strftime('%Y-%m-%d')}) ---")
+    logging.debug(f"Current Observation Shape: {obs.shape}")
+    # Log state components if needed (careful with size)
+    cash = obs[0]
+    holdings = obs[1:1+env_test_instance.stock_dim]
+    # tech_indicators = obs[1+env_test_instance.stock_dim:]
+    logging.debug(f"  State - Cash: {cash:.2f}")
+    logging.debug(f"  State - Holdings: {holdings}")
+    # logging.debug(f"  State - Tech Indicators Shape: {tech_indicators.shape}")
+
     action, _states = model.predict(obs, deterministic=True)
+    logging.debug(f"Raw Action Vector: {action}") # Log the raw action output by the model
+
+    # --- Log Buy/Sell/Hold Decisions ---
+    decision_threshold = 0.0 # Threshold for buy/sell (on raw action [-1, 1])
+    scaled_action = action * env_test_instance.hmax # Action scaled to shares
+    logging.debug(f"Scaled Action (Target Shares): {scaled_action.astype(int)}")
+    for i, ticker in enumerate(tickers):
+        raw_act = action[i]
+        scaled_act = scaled_action[i]
+        decision = "HOLD"
+        if raw_act > decision_threshold:
+            decision = f"BUY ({scaled_act:.0f} shares target)"
+        elif raw_act < -decision_threshold:
+            decision = f"SELL ({abs(scaled_act):.0f} shares target)"
+        logging.debug(f"  Decision for {ticker}: {decision} (Raw: {raw_act:.3f})")
+    # --- End Log Decisions ---
+
+    # Store state before taking action for better debugging context
+    state_memory.append(obs)
+
+    # Take the step
     obs, reward, terminated, truncated, info = env_test_instance.step(action)
+
+    # Log results after the step
+    logging.debug(f"Action Taken: {action}") # Log the action actually processed by env (might be clipped/modified)
+    logging.debug(f"Reward Received: {reward:.4f}")
+    logging.debug(f"Terminated: {terminated}, Truncated: {truncated}")
+    logging.debug(f"Info Dict: {info}")
 
     # Store results from the step
     # info might contain portfolio value, but let's use the env's asset_memory if available
@@ -120,9 +203,11 @@ while not (terminated or truncated):
 
     if terminated or truncated:
         logging.info("Backtesting loop finished.")
+        logging.debug("--- Backtest End ---")
         # Final values are often in the 'info' dict upon termination
         if info:
              logging.info(f"Final Info: {info}")
+             logging.debug(f"Final Info (Debug): {info}") # Also log final info at debug
         break
 
 # --- Add Plotting Function ---
@@ -141,6 +226,29 @@ def plot_account_value(df, save_path):
         logging.info(f"Account value plot saved to: {save_path}")
     except Exception as e:
         logging.error(f"Error generating account value plot: {e}", exc_info=True)
+
+
+def plot_stock_prices(df, tickers, save_path):
+    """Plots closing prices for multiple stocks over time and saves the figure."""
+    try:
+        plt.figure(figsize=(15, 7)) # Adjusted size slightly
+        for ticker in tickers:
+            ticker_df = df[df['tic'] == ticker]
+            # Ensure dates are sorted for plotting
+            ticker_df = ticker_df.sort_values(by='date')
+            plt.plot(ticker_df['date'], ticker_df['close'], label=ticker)
+
+        plt.title('Stock Closing Prices During Backtest Period')
+        plt.xlabel('Date')
+        plt.ylabel('Closing Price')
+        plt.legend(loc='upper left') # Add legend
+        plt.grid(True)
+        plt.tight_layout()
+        plt.savefig(save_path)
+        plt.close() # Close the figure to free memory
+        logging.info(f"Stock prices plot saved to: {save_path}")
+    except Exception as e:
+        logging.error(f"Error generating stock prices plot: {e}", exc_info=True)
 
 # --- Performance Analysis ---
 logging.info("Calculating performance metrics...")
@@ -232,7 +340,12 @@ except Exception as e:
 
 # --- Generate and Save Matplotlib Plot ---
 plot_save_path = os.path.join(BACKTEST_RESULTS_DIR, f"{MODEL_FILENAME_BASE}_account_value_plot.png")
-plot_account_value(account_value_df, plot_save_path) # Call the new function
+plot_account_value(account_value_df, plot_save_path) # Call the account value plot function
+
+# --- Generate and Save Stock Prices Plot ---
+prices_plot_save_path = os.path.join(BACKTEST_RESULTS_DIR, f"{MODEL_FILENAME_BASE}_stock_prices_plot.png")
+# We need the original test_df and the list of tickers
+plot_stock_prices(test_df, tickers, prices_plot_save_path) # Call the new stock prices plot function
 
 # --- Save Results ---
 results_df_path = os.path.join(BACKTEST_RESULTS_DIR, f"{MODEL_FILENAME_BASE}_account_values.csv")

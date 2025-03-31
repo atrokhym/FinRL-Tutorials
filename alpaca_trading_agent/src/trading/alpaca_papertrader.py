@@ -8,6 +8,7 @@ import sys
 import logging
 import time
 from datetime import datetime, timedelta
+import pytz # Import pytz for timezone handling
 import schedule # For scheduling the trading logic
 from stable_baselines3 import PPO
 
@@ -76,7 +77,7 @@ def fetch_latest_data(api, tickers, timeframe, lookback_days):
     logging.info(f"Fetching latest data for {len(tickers)} tickers, lookback {lookback_days} days.")
     # Calculate start and end dates for the lookback period
     # Alpaca API expects ISO format, end date is exclusive for get_bars
-    end_dt = datetime.now(tradeapi.Timezone) # Use Alpaca's timezone awareness
+    end_dt = datetime.now(pytz.timezone('America/New_York')) # Use pytz for correct timezone
     start_dt = end_dt - timedelta(days=lookback_days)
 
     # Format for Alpaca API (adjust if needed based on API version/docs)
@@ -91,7 +92,8 @@ def fetch_latest_data(api, tickers, timeframe, lookback_days):
             timeframe,
             start=start_iso,
             end=end_iso,
-            adjustment='raw' # Or 'split', 'dividend' as needed
+            adjustment='raw', # Or 'split', 'dividend' as needed
+            feed='iex' # Explicitly request IEX data feed
         ).df
         logging.info(f"Fetched {len(barset)} bars.")
 
@@ -110,6 +112,21 @@ def fetch_latest_data(api, tickers, timeframe, lookback_days):
         if not all(col in barset.columns for col in required_cols):
             logging.error(f"Fetched data missing required columns. Found: {barset.columns.tolist()}")
             return None
+
+        # Reset index to turn the DatetimeIndex (likely named 'timestamp') into a column
+        barset.reset_index(inplace=True)
+        # Rename the index column to 'date' as expected by preprocessing
+        if 'timestamp' in barset.columns:
+             barset.rename(columns={'timestamp': 'date'}, inplace=True)
+             logging.debug("Renamed 'timestamp' column to 'date'.")
+        elif 'index' in barset.columns: # Fallback if index had no name
+             barset.rename(columns={'index': 'date'}, inplace=True)
+             logging.debug("Renamed 'index' column to 'date'.")
+        else:
+             # If neither 'timestamp' nor 'index' is found, we might have a problem
+             # Check if 'date' already exists from a previous step (unlikely here)
+             if 'date' not in barset.columns:
+                 logging.warning("Could not find index column ('timestamp' or 'index') after reset_index to rename to 'date'. Preprocessing might fail.")
 
         return barset
 
@@ -228,7 +245,7 @@ def run_trading_logic(api, model):
             logging.info(f"ORDER PREP: Buy {qty_to_buy} shares of {tic} at market (Current Holding: {current_holding}, Est Price: {current_price_estimate}).")
             orders_to_submit.append({
                 "symbol": tic,
-                "qty": qty_to_buy,
+                "qty": int(qty_to_buy), # Cast to standard int
                 "side": "buy",
                 "type": "market",
                 "time_in_force": "day" # Good Till Day
@@ -241,7 +258,7 @@ def run_trading_logic(api, model):
                 logging.info(f"ORDER PREP: Sell {qty_to_sell} shares of {tic} at market (Current Holding: {current_holding}, Est Price: {current_price_estimate}).")
                 orders_to_submit.append({
                     "symbol": tic,
-                    "qty": qty_to_sell,
+                    "qty": int(qty_to_sell), # Cast to standard int
                     "side": "sell",
                     "type": "market",
                     "time_in_force": "day"
@@ -314,3 +331,4 @@ if __name__ == "__main__":
 
     # Note: Need to handle graceful shutdown (e.g., Ctrl+C) if running continuously.
     # logging.info("--- Alpaca Paper Trading Agent Finished ---") # This line might not be reached in loop
+    # run_trading_logic(api=alpaca_api, model=trading_model)

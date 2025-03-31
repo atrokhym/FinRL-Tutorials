@@ -171,10 +171,10 @@ class AlpacaStockTradingEnv(gym.Env):
     def _sell_stock(self, index, action):
         """Replicated from StockTradingEnv"""
         def _do_sell_normal():
-            if self.state[index + 1 + self.stock_dim] > 0: # Check if shares > 0
+            if self.state[index + 1] > 0: # Check if shares > 0
                 # Sell a proportion
                 sell_num_shares = min(
-                    abs(action), self.state[index + 1 + self.stock_dim]
+                    abs(action), self.state[index + 1]
                 )
                 sell_amount = (
                     self.data.loc[index, "close"]
@@ -184,7 +184,7 @@ class AlpacaStockTradingEnv(gym.Env):
                 # Update balance
                 self.state[0] += sell_amount
                 # Update shares
-                self.state[index + 1 + self.stock_dim] -= sell_num_shares
+                self.state[index + 1] -= sell_num_shares
                 self.cost += (
                     self.data.loc[index, "close"]
                     * sell_num_shares
@@ -201,24 +201,25 @@ class AlpacaStockTradingEnv(gym.Env):
              current_turbulence = self.df.loc[self.day * self.stock_dim, 'turbulence'] if 'turbulence' in self.df.columns else 0
              if current_turbulence >= self.turbulence_threshold:
                  # Sell all shares if turbulence is high
-                 if self.state[index + 1 + self.stock_dim] > 0:
+                 if self.state[index + 1] > 0:
                      # Update balance
                      self.state[0] += (
                          self.data.loc[index, "close"]
-                         * self.state[index + 1 + self.stock_dim]
+                         * self.state[index + 1] # Corrected index
                          * (1 - self.sell_cost_pct[index])
                      )
                      # Update shares
                      self.cost += (
                          self.data.loc[index, "close"]
-                         * self.state[index + 1 + self.stock_dim]
+                         * self.state[index + 1] # Corrected index
                          * self.sell_cost_pct[index]
                      )
-                     self.state[index + 1 + self.stock_dim] = 0
+                     shares_to_sell = self.state[index + 1] # Store before zeroing
+                     self.state[index + 1] = 0 # Corrected index
                      self.trades += 1
                  else:
-                     sell_num_shares = 0
-                 return self.state[index + 1 + self.stock_dim] # Return shares sold (all)
+                     sell_num_shares = 0 # Should this be shares_to_sell = 0? No, sell_num_shares is fine here.
+                 return shares_to_sell # Return the stored number of shares sold
              else:
                  # Sell normally if turbulence is low
                  sell_num_shares = _do_sell_normal()
@@ -242,7 +243,7 @@ class AlpacaStockTradingEnv(gym.Env):
             # Update balance
             self.state[0] -= buy_amount
             # Update shares
-            self.state[index + 1 + self.stock_dim] += buy_num_shares
+            self.state[index + 1] += buy_num_shares # Corrected index
             self.cost += (
                 self.data.loc[index, "close"] * buy_num_shares * self.buy_cost_pct[index]
             )

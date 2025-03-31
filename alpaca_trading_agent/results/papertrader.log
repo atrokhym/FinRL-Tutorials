@@ -12,3 +12,661 @@
 2025-03-30 21:00:37,619 - INFO - Model loaded successfully.
 2025-03-30 21:00:37,619 - INFO - Scheduling trading logic to run daily at 15:45 EST/EDT.
 2025-03-30 21:00:37,632 - INFO - Scheduler started. Waiting for scheduled jobs...
+2025-03-31 12:03:49,732 - INFO - --- Starting Alpaca Paper Trading Agent ---
+2025-03-31 12:03:49,732 - INFO - Connecting to Alpaca API...
+2025-03-31 12:03:49,969 - INFO - Connected successfully. Account Status: ACTIVE
+2025-03-31 12:03:49,969 - INFO - Loading trained model from: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/results/models/PPO_1D_20000.zip
+2025-03-31 12:03:51,080 - INFO - Model loaded successfully.
+2025-03-31 12:03:51,080 - INFO - Scheduling trading logic to run daily at 15:45 EST/EDT.
+2025-03-31 12:03:51,086 - INFO - Scheduler started. Waiting for scheduled jobs...
+2025-03-31 13:03:18,948 - INFO - --- Starting Alpaca Paper Trading Agent ---
+2025-03-31 13:03:18,948 - INFO - Connecting to Alpaca API...
+2025-03-31 13:03:19,166 - INFO - Connected successfully. Account Status: ACTIVE
+2025-03-31 13:03:19,166 - INFO - Loading trained model from: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/results/models/PPO_1D_20000.zip
+2025-03-31 13:03:20,340 - INFO - Model loaded successfully.
+2025-03-31 13:03:20,340 - INFO - Scheduling trading logic to run daily at 15:45 EST/EDT.
+2025-03-31 13:03:20,346 - INFO - Scheduler started. Waiting for scheduled jobs...
+2025-03-31 15:05:11,810 - INFO - --- Starting Alpaca Paper Trading Agent ---
+2025-03-31 15:05:11,811 - INFO - Connecting to Alpaca API...
+2025-03-31 15:05:12,079 - INFO - Connected successfully. Account Status: ACTIVE
+2025-03-31 15:05:12,080 - INFO - Loading trained model from: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/results/models/PPO_1D_20000.zip
+2025-03-31 15:05:12,749 - INFO - Model loaded successfully.
+2025-03-31 15:05:12,749 - INFO - Scheduling trading logic to run daily at 15:45 EST/EDT.
+2025-03-31 15:05:12,755 - INFO - Scheduler started. Waiting for scheduled jobs...
+2025-03-31 15:07:18,520 - INFO - --- Starting Alpaca Paper Trading Agent ---
+2025-03-31 15:07:18,520 - INFO - Connecting to Alpaca API...
+2025-03-31 15:07:18,793 - INFO - Connected successfully. Account Status: ACTIVE
+2025-03-31 15:07:18,793 - INFO - Loading trained model from: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/results/models/PPO_1D_20000.zip
+2025-03-31 15:07:19,439 - INFO - Model loaded successfully.
+2025-03-31 15:07:19,440 - INFO - Scheduling trading logic to run daily at 15:45 EST/EDT.
+2025-03-31 15:07:19,445 - INFO - Scheduler started. Waiting for scheduled jobs...
+2025-03-31 15:07:49,554 - INFO - --- Starting Alpaca Paper Trading Agent ---
+2025-03-31 15:07:49,554 - INFO - Connecting to Alpaca API...
+2025-03-31 15:07:49,839 - INFO - Connected successfully. Account Status: ACTIVE
+2025-03-31 15:07:49,839 - INFO - Loading trained model from: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/results/models/PPO_1D_20000.zip
+2025-03-31 15:07:50,498 - INFO - Model loaded successfully.
+2025-03-31 15:07:50,498 - INFO - Scheduling trading logic to run daily at 15:45 EST/EDT.
+2025-03-31 15:07:50,503 - INFO - Scheduler started. Waiting for scheduled jobs...
+2025-03-31 15:17:14,969 - INFO - --- Starting Alpaca Paper Trading Agent ---
+2025-03-31 15:17:14,970 - INFO - Connecting to Alpaca API...
+2025-03-31 15:17:15,317 - INFO - Connected successfully. Account Status: ACTIVE
+2025-03-31 15:17:15,317 - INFO - Loading trained model from: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/results/models/PPO_1D_20000.zip
+2025-03-31 15:17:16,413 - INFO - Model loaded successfully.
+2025-03-31 15:17:16,413 - INFO - Scheduling trading logic to run daily at 15:45 EST/EDT.
+2025-03-31 15:17:16,419 - INFO - Scheduler started. Waiting for scheduled jobs...
+2025-03-31 15:45:21,295 - INFO - --- Running Trading Logic Cycle ---
+2025-03-31 15:45:21,296 - INFO - Fetching latest data for 10 tickers, lookback 60 days.
+2025-03-31 15:51:30,939 - INFO - --- Starting Alpaca Paper Trading Agent ---
+2025-03-31 15:51:30,940 - INFO - Connecting to Alpaca API...
+2025-03-31 15:51:31,334 - INFO - Connected successfully. Account Status: ACTIVE
+2025-03-31 15:51:31,334 - INFO - Loading trained model from: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/results/models/PPO_1D_20000.zip
+2025-03-31 15:51:32,754 - INFO - Model loaded successfully.
+2025-03-31 15:51:32,754 - INFO - Scheduling trading logic to run daily at 15:45 EST/EDT.
+2025-03-31 15:51:32,765 - INFO - Scheduler started. Waiting for scheduled jobs...
+2025-03-31 15:55:57,770 - INFO - --- Starting Alpaca Paper Trading Agent ---
+2025-03-31 15:55:57,771 - INFO - Connecting to Alpaca API...
+2025-03-31 15:55:58,015 - INFO - Connected successfully. Account Status: ACTIVE
+2025-03-31 15:55:58,015 - INFO - Loading trained model from: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/results/models/PPO_1D_20000.zip
+2025-03-31 15:55:59,284 - INFO - Model loaded successfully.
+2025-03-31 15:55:59,284 - INFO - Scheduling trading logic to run daily at 15:45 EST/EDT.
+2025-03-31 15:55:59,289 - INFO - Scheduler started. Waiting for scheduled jobs...
+2025-03-31 15:57:56,221 - INFO - --- Starting Alpaca Paper Trading Agent ---
+2025-03-31 15:57:56,221 - INFO - Connecting to Alpaca API...
+2025-03-31 15:57:56,417 - INFO - Connected successfully. Account Status: ACTIVE
+2025-03-31 15:57:56,417 - INFO - Loading trained model from: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/results/models/PPO_1D_20000.zip
+2025-03-31 15:57:57,735 - INFO - Model loaded successfully.
+2025-03-31 15:57:57,735 - INFO - --- Running Trading Logic Cycle ---
+2025-03-31 15:57:57,735 - INFO - Fetching latest data for 10 tickers, lookback 60 days.
+2025-03-31 15:57:57,924 - ERROR - Error fetching latest data from Alpaca: subscription does not permit querying recent SIP data
+Traceback (most recent call last):
+  File "/app/workspaces/FinRL-Tutorials/alpaca_trading_agent/src/trading/alpaca_papertrader.py", line 90, in fetch_latest_data
+    barset = api.get_bars(
+             ^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/alpaca_trade_api/rest.py", line 735, in get_bars
+    bars = list(self.get_bars_iter(symbol,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/alpaca_trade_api/rest.py", line 718, in get_bars_iter
+    for bar in bars:
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/alpaca_trade_api/rest.py", line 594, in _data_get
+    resp = self.data_get(path, data=data, feed=feed,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/alpaca_trade_api/rest.py", line 274, in data_get
+    return self._request(
+           ^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/alpaca_trade_api/rest.py", line 222, in _request
+    return self._one_request(method, url, opts, retry)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/alpaca_trade_api/rest.py", line 248, in _one_request
+    raise_api_error(resp, http_error)
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/alpaca_trade_api/rest.py", line 83, in raise_api_error
+    raise APIError(error, http_error) from None
+alpaca_trade_api.rest.APIError: subscription does not permit querying recent SIP data
+2025-03-31 15:57:57,928 - ERROR - Failed to fetch or received empty data. Skipping cycle.
+2025-03-31 15:59:02,513 - INFO - --- Starting Alpaca Paper Trading Agent ---
+2025-03-31 15:59:02,513 - INFO - Connecting to Alpaca API...
+2025-03-31 15:59:02,770 - INFO - Connected successfully. Account Status: ACTIVE
+2025-03-31 15:59:02,770 - INFO - Loading trained model from: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/results/models/PPO_1D_20000.zip
+2025-03-31 15:59:04,085 - INFO - Model loaded successfully.
+2025-03-31 15:59:04,085 - INFO - --- Running Trading Logic Cycle ---
+2025-03-31 15:59:04,085 - INFO - Fetching latest data for 10 tickers, lookback 60 days.
+2025-03-31 15:59:04,338 - ERROR - Error fetching latest data from Alpaca: subscription does not permit querying recent SIP data
+Traceback (most recent call last):
+  File "/app/workspaces/FinRL-Tutorials/alpaca_trading_agent/src/trading/alpaca_papertrader.py", line 90, in fetch_latest_data
+    barset = api.get_bars(
+             ^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/alpaca_trade_api/rest.py", line 735, in get_bars
+    bars = list(self.get_bars_iter(symbol,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/alpaca_trade_api/rest.py", line 718, in get_bars_iter
+    for bar in bars:
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/alpaca_trade_api/rest.py", line 594, in _data_get
+    resp = self.data_get(path, data=data, feed=feed,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/alpaca_trade_api/rest.py", line 274, in data_get
+    return self._request(
+           ^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/alpaca_trade_api/rest.py", line 222, in _request
+    return self._one_request(method, url, opts, retry)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/alpaca_trade_api/rest.py", line 248, in _one_request
+    raise_api_error(resp, http_error)
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/alpaca_trade_api/rest.py", line 83, in raise_api_error
+    raise APIError(error, http_error) from None
+alpaca_trade_api.rest.APIError: subscription does not permit querying recent SIP data
+2025-03-31 15:59:04,351 - ERROR - Failed to fetch or received empty data. Skipping cycle.
+2025-03-31 16:07:47,204 - INFO - --- Starting Alpaca Paper Trading Agent ---
+2025-03-31 16:07:47,205 - INFO - Connecting to Alpaca API...
+2025-03-31 16:07:47,415 - INFO - Connected successfully. Account Status: ACTIVE
+2025-03-31 16:07:47,415 - INFO - Loading trained model from: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/results/models/PPO_1D_20000.zip
+2025-03-31 16:07:48,689 - INFO - Model loaded successfully.
+2025-03-31 16:07:48,689 - INFO - --- Running Trading Logic Cycle ---
+2025-03-31 16:07:48,689 - INFO - Fetching latest data for 10 tickers, lookback 60 days.
+2025-03-31 16:07:49,077 - INFO - Fetched 410 bars.
+2025-03-31 16:07:49,083 - INFO - Starting preprocessing. Initial shape: (41, 9)
+2025-03-31 16:07:49,083 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:09:39,393 - INFO - --- Starting Alpaca Paper Trading Agent ---
+2025-03-31 16:09:39,394 - INFO - Connecting to Alpaca API...
+2025-03-31 16:09:39,647 - INFO - Connected successfully. Account Status: ACTIVE
+2025-03-31 16:09:39,648 - INFO - Loading trained model from: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/results/models/PPO_1D_20000.zip
+2025-03-31 16:09:39,810 - INFO - Model loaded successfully.
+2025-03-31 16:09:39,810 - INFO - --- Running Trading Logic Cycle ---
+2025-03-31 16:09:39,810 - INFO - Fetching latest data for 10 tickers, lookback 60 days.
+2025-03-31 16:09:40,164 - INFO - Fetched 410 bars.
+2025-03-31 16:09:40,168 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:09:40,168 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:11:26,197 - INFO - --- Starting Alpaca Paper Trading Agent ---
+2025-03-31 16:11:26,198 - INFO - Connecting to Alpaca API...
+2025-03-31 16:11:26,422 - INFO - Connected successfully. Account Status: ACTIVE
+2025-03-31 16:11:26,422 - INFO - Loading trained model from: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/results/models/PPO_1D_20000.zip
+2025-03-31 16:11:27,660 - INFO - Model loaded successfully.
+2025-03-31 16:11:27,660 - INFO - --- Running Trading Logic Cycle ---
+2025-03-31 16:11:27,660 - INFO - Fetching latest data for 10 tickers, lookback 60 days.
+2025-03-31 16:11:27,933 - INFO - Fetched 410 bars.
+2025-03-31 16:11:27,937 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:11:27,938 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:11:27,954 - INFO - Preprocessing finished. Final shape: (0, 15)
+2025-03-31 16:11:27,954 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:11:27,954 - INFO - Date range: NaT to NaT
+2025-03-31 16:11:27,955 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:11:27,955 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:11:27,967 - INFO - Preprocessing finished. Final shape: (0, 15)
+2025-03-31 16:11:27,967 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:11:27,967 - INFO - Date range: NaT to NaT
+2025-03-31 16:11:27,967 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:11:27,968 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:11:27,979 - INFO - Preprocessing finished. Final shape: (0, 15)
+2025-03-31 16:11:27,980 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:11:27,980 - INFO - Date range: NaT to NaT
+2025-03-31 16:11:27,980 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:11:27,981 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:11:27,992 - INFO - Preprocessing finished. Final shape: (0, 15)
+2025-03-31 16:11:27,993 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:11:27,993 - INFO - Date range: NaT to NaT
+2025-03-31 16:11:27,993 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:11:27,994 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:11:28,006 - INFO - Preprocessing finished. Final shape: (0, 15)
+2025-03-31 16:11:28,006 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:11:28,006 - INFO - Date range: NaT to NaT
+2025-03-31 16:11:28,007 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:11:28,007 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:11:28,020 - INFO - Preprocessing finished. Final shape: (0, 15)
+2025-03-31 16:11:28,020 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:11:28,020 - INFO - Date range: NaT to NaT
+2025-03-31 16:11:28,021 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:11:28,022 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:11:28,034 - INFO - Preprocessing finished. Final shape: (0, 15)
+2025-03-31 16:11:28,034 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:11:28,035 - INFO - Date range: NaT to NaT
+2025-03-31 16:11:28,035 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:11:28,036 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:11:28,048 - INFO - Preprocessing finished. Final shape: (0, 15)
+2025-03-31 16:11:28,048 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:11:28,049 - INFO - Date range: NaT to NaT
+2025-03-31 16:11:28,049 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:11:28,050 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:11:28,062 - INFO - Preprocessing finished. Final shape: (0, 15)
+2025-03-31 16:11:28,062 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:11:28,062 - INFO - Date range: NaT to NaT
+2025-03-31 16:11:28,063 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:11:28,063 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:11:28,076 - INFO - Preprocessing finished. Final shape: (0, 15)
+2025-03-31 16:11:28,076 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:11:28,076 - INFO - Date range: NaT to NaT
+2025-03-31 16:11:28,080 - INFO - Preprocessing complete. Processed data shape: (0, 15)
+2025-03-31 16:11:28,080 - INFO - Latest date in processed data: NaT
+2025-03-31 16:11:28,080 - ERROR - Could not get complete state data for latest date NaT. Found 0 tickers.
+2025-03-31 16:13:53,314 - INFO - --- Starting Alpaca Paper Trading Agent ---
+2025-03-31 16:13:53,315 - INFO - Connecting to Alpaca API...
+2025-03-31 16:13:53,526 - INFO - Connected successfully. Account Status: ACTIVE
+2025-03-31 16:13:53,526 - INFO - Loading trained model from: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/results/models/PPO_1D_20000.zip
+2025-03-31 16:13:54,861 - INFO - Model loaded successfully.
+2025-03-31 16:13:54,861 - INFO - --- Running Trading Logic Cycle ---
+2025-03-31 16:13:54,861 - INFO - Fetching latest data for 10 tickers, lookback 60 days.
+2025-03-31 16:13:55,091 - INFO - Fetched 410 bars.
+2025-03-31 16:13:55,096 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:13:55,096 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:13:55,115 - INFO - Preprocessing finished. Final shape: (1, 15)
+2025-03-31 16:13:55,115 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:13:55,115 - INFO - Date range: 2025-03-31 04:00:00+00:00 to 2025-03-31 04:00:00+00:00
+2025-03-31 16:13:55,116 - WARNING - NaN values remain after preprocessing. Review handling.
+2025-03-31 16:13:55,116 - WARNING -                        date  close  high  low  trade_count  open  volume  vwap symbol   tic  macd  rsi_14  cci_14  boll_ub  boll_lb
+0 2025-03-31 04:00:00+00:00    NaN   NaN  NaN          NaN   NaN     NaN   NaN   AAPL  AAPL   NaN     NaN     NaN      NaN      NaN
+2025-03-31 16:13:55,128 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:13:55,129 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:13:55,143 - INFO - Preprocessing finished. Final shape: (1, 15)
+2025-03-31 16:13:55,143 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:13:55,143 - INFO - Date range: 2025-03-31 04:00:00+00:00 to 2025-03-31 04:00:00+00:00
+2025-03-31 16:13:55,143 - WARNING - NaN values remain after preprocessing. Review handling.
+2025-03-31 16:13:55,144 - WARNING -                        date  close  high  low  trade_count  open  volume  vwap symbol   tic  macd  rsi_14  cci_14  boll_ub  boll_lb
+0 2025-03-31 04:00:00+00:00    NaN   NaN  NaN          NaN   NaN     NaN   NaN   ADBE  ADBE   NaN     NaN     NaN      NaN      NaN
+2025-03-31 16:13:55,157 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:13:55,157 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:13:55,173 - INFO - Preprocessing finished. Final shape: (1, 15)
+2025-03-31 16:13:55,173 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:13:55,173 - INFO - Date range: 2025-03-31 04:00:00+00:00 to 2025-03-31 04:00:00+00:00
+2025-03-31 16:13:55,173 - WARNING - NaN values remain after preprocessing. Review handling.
+2025-03-31 16:13:55,174 - WARNING -                        date  close  high  low  trade_count  open  volume  vwap symbol   tic  macd  rsi_14  cci_14  boll_ub  boll_lb
+0 2025-03-31 04:00:00+00:00    NaN   NaN  NaN          NaN   NaN     NaN   NaN   AMZN  AMZN   NaN     NaN     NaN      NaN      NaN
+2025-03-31 16:13:55,187 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:13:55,188 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:13:55,203 - INFO - Preprocessing finished. Final shape: (1, 15)
+2025-03-31 16:13:55,203 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:13:55,203 - INFO - Date range: 2025-03-31 04:00:00+00:00 to 2025-03-31 04:00:00+00:00
+2025-03-31 16:13:55,203 - WARNING - NaN values remain after preprocessing. Review handling.
+2025-03-31 16:13:55,203 - WARNING -                        date  close  high  low  trade_count  open  volume  vwap symbol   tic  macd  rsi_14  cci_14  boll_ub  boll_lb
+0 2025-03-31 04:00:00+00:00    NaN   NaN  NaN          NaN   NaN     NaN   NaN   CSCO  CSCO   NaN     NaN     NaN      NaN      NaN
+2025-03-31 16:13:55,218 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:13:55,218 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:13:55,234 - INFO - Preprocessing finished. Final shape: (1, 15)
+2025-03-31 16:13:55,234 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:13:55,235 - INFO - Date range: 2025-03-31 04:00:00+00:00 to 2025-03-31 04:00:00+00:00
+2025-03-31 16:13:55,235 - WARNING - NaN values remain after preprocessing. Review handling.
+2025-03-31 16:13:55,235 - WARNING -                        date  close  high  low  trade_count  open  volume  vwap symbol    tic  macd  rsi_14  cci_14  boll_ub  boll_lb
+0 2025-03-31 04:00:00+00:00    NaN   NaN  NaN          NaN   NaN     NaN   NaN  GOOGL  GOOGL   NaN     NaN     NaN      NaN      NaN
+2025-03-31 16:13:55,248 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:13:55,249 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:13:55,263 - INFO - Preprocessing finished. Final shape: (1, 15)
+2025-03-31 16:13:55,263 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:13:55,263 - INFO - Date range: 2025-03-31 04:00:00+00:00 to 2025-03-31 04:00:00+00:00
+2025-03-31 16:13:55,264 - WARNING - NaN values remain after preprocessing. Review handling.
+2025-03-31 16:13:55,264 - WARNING -                        date  close  high  low  trade_count  open  volume  vwap symbol   tic  macd  rsi_14  cci_14  boll_ub  boll_lb
+0 2025-03-31 04:00:00+00:00    NaN   NaN  NaN          NaN   NaN     NaN   NaN   INTC  INTC   NaN     NaN     NaN      NaN      NaN
+2025-03-31 16:13:55,277 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:13:55,278 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:13:55,292 - INFO - Preprocessing finished. Final shape: (1, 15)
+2025-03-31 16:13:55,292 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:13:55,292 - INFO - Date range: 2025-03-31 04:00:00+00:00 to 2025-03-31 04:00:00+00:00
+2025-03-31 16:13:55,293 - WARNING - NaN values remain after preprocessing. Review handling.
+2025-03-31 16:13:55,293 - WARNING -                        date  close  high  low  trade_count  open  volume  vwap symbol   tic  macd  rsi_14  cci_14  boll_ub  boll_lb
+0 2025-03-31 04:00:00+00:00    NaN   NaN  NaN          NaN   NaN     NaN   NaN   META  META   NaN     NaN     NaN      NaN      NaN
+2025-03-31 16:13:55,306 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:13:55,306 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:13:55,321 - INFO - Preprocessing finished. Final shape: (1, 15)
+2025-03-31 16:13:55,321 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:13:55,321 - INFO - Date range: 2025-03-31 04:00:00+00:00 to 2025-03-31 04:00:00+00:00
+2025-03-31 16:13:55,322 - WARNING - NaN values remain after preprocessing. Review handling.
+2025-03-31 16:13:55,322 - WARNING -                        date  close  high  low  trade_count  open  volume  vwap symbol   tic  macd  rsi_14  cci_14  boll_ub  boll_lb
+0 2025-03-31 04:00:00+00:00    NaN   NaN  NaN          NaN   NaN     NaN   NaN   MSFT  MSFT   NaN     NaN     NaN      NaN      NaN
+2025-03-31 16:13:55,337 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:13:55,338 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:13:55,353 - INFO - Preprocessing finished. Final shape: (1, 15)
+2025-03-31 16:13:55,353 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:13:55,353 - INFO - Date range: 2025-03-31 04:00:00+00:00 to 2025-03-31 04:00:00+00:00
+2025-03-31 16:13:55,353 - WARNING - NaN values remain after preprocessing. Review handling.
+2025-03-31 16:13:55,354 - WARNING -                        date  close  high  low  trade_count  open  volume  vwap symbol   tic  macd  rsi_14  cci_14  boll_ub  boll_lb
+0 2025-03-31 04:00:00+00:00    NaN   NaN  NaN          NaN   NaN     NaN   NaN   NVDA  NVDA   NaN     NaN     NaN      NaN      NaN
+2025-03-31 16:13:55,367 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:13:55,368 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:13:55,383 - INFO - Preprocessing finished. Final shape: (1, 15)
+2025-03-31 16:13:55,383 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:13:55,383 - INFO - Date range: 2025-03-31 04:00:00+00:00 to 2025-03-31 04:00:00+00:00
+2025-03-31 16:13:55,383 - WARNING - NaN values remain after preprocessing. Review handling.
+2025-03-31 16:13:55,384 - WARNING -                        date  close  high  low  trade_count  open  volume  vwap symbol   tic  macd  rsi_14  cci_14  boll_ub  boll_lb
+0 2025-03-31 04:00:00+00:00    NaN   NaN  NaN          NaN   NaN     NaN   NaN   TSLA  TSLA   NaN     NaN     NaN      NaN      NaN
+2025-03-31 16:13:55,415 - INFO - Preprocessing complete. Processed data shape: (10, 15)
+2025-03-31 16:13:55,415 - INFO - Latest date in processed data: 2025-03-31 04:00:00+00:00
+2025-03-31 16:13:55,491 - INFO - Current Cash: 98842.69, Holdings: {}
+2025-03-31 16:13:55,493 - INFO - State constructed for prediction. Shape: (131,)
+2025-03-31 16:13:55,513 - ERROR - Error during model prediction: Expected parameter loc (Tensor of shape (1, 10)) of distribution Normal(loc: torch.Size([1, 10]), scale: torch.Size([1, 10])) to satisfy the constraint Real(), but found invalid values:
+tensor([[nan, nan, nan, nan, nan, nan, nan, nan, nan, nan]])
+Traceback (most recent call last):
+  File "/app/workspaces/FinRL-Tutorials/alpaca_trading_agent/src/trading/alpaca_papertrader.py", line 211, in run_trading_logic
+    action, _states = model.predict(state, deterministic=True)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/stable_baselines3/common/base_class.py", line 557, in predict
+    return self.policy.predict(observation, state, episode_start, deterministic)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/stable_baselines3/common/policies.py", line 368, in predict
+    actions = self._predict(obs_tensor, deterministic=deterministic)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/stable_baselines3/common/policies.py", line 717, in _predict
+    return self.get_distribution(observation).get_actions(deterministic=deterministic)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/stable_baselines3/common/policies.py", line 752, in get_distribution
+    return self._get_action_dist_from_latent(latent_pi)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/stable_baselines3/common/policies.py", line 694, in _get_action_dist_from_latent
+    return self.action_dist.proba_distribution(mean_actions, self.log_std)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/stable_baselines3/common/distributions.py", line 164, in proba_distribution
+    self.distribution = Normal(mean_actions, action_std)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/torch/distributions/normal.py", line 59, in __init__
+    super().__init__(batch_shape, validate_args=validate_args)
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/torch/distributions/distribution.py", line 71, in __init__
+    raise ValueError(
+ValueError: Expected parameter loc (Tensor of shape (1, 10)) of distribution Normal(loc: torch.Size([1, 10]), scale: torch.Size([1, 10])) to satisfy the constraint Real(), but found invalid values:
+tensor([[nan, nan, nan, nan, nan, nan, nan, nan, nan, nan]])
+2025-03-31 16:16:58,777 - INFO - --- Starting Alpaca Paper Trading Agent ---
+2025-03-31 16:16:58,777 - INFO - Connecting to Alpaca API...
+2025-03-31 16:16:58,968 - INFO - Connected successfully. Account Status: ACTIVE
+2025-03-31 16:16:58,968 - INFO - Loading trained model from: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/results/models/PPO_1D_20000.zip
+2025-03-31 16:17:00,312 - INFO - Model loaded successfully.
+2025-03-31 16:17:00,312 - INFO - --- Running Trading Logic Cycle ---
+2025-03-31 16:17:00,312 - INFO - Fetching latest data for 10 tickers, lookback 60 days.
+2025-03-31 16:17:00,654 - INFO - Fetched 410 bars.
+2025-03-31 16:17:00,658 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:17:00,659 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:17:00,675 - INFO - Preprocessing finished. Final shape: (1, 15)
+2025-03-31 16:17:00,675 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:17:00,675 - INFO - Date range: 2025-03-31 04:00:00+00:00 to 2025-03-31 04:00:00+00:00
+2025-03-31 16:17:00,676 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:17:00,676 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:17:00,688 - INFO - Preprocessing finished. Final shape: (1, 15)
+2025-03-31 16:17:00,688 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:17:00,688 - INFO - Date range: 2025-03-31 04:00:00+00:00 to 2025-03-31 04:00:00+00:00
+2025-03-31 16:17:00,689 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:17:00,689 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:17:00,701 - INFO - Preprocessing finished. Final shape: (1, 15)
+2025-03-31 16:17:00,702 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:17:00,702 - INFO - Date range: 2025-03-31 04:00:00+00:00 to 2025-03-31 04:00:00+00:00
+2025-03-31 16:17:00,702 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:17:00,703 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:17:00,715 - INFO - Preprocessing finished. Final shape: (1, 15)
+2025-03-31 16:17:00,716 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:17:00,716 - INFO - Date range: 2025-03-31 04:00:00+00:00 to 2025-03-31 04:00:00+00:00
+2025-03-31 16:17:00,716 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:17:00,717 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:17:00,730 - INFO - Preprocessing finished. Final shape: (1, 15)
+2025-03-31 16:17:00,730 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:17:00,730 - INFO - Date range: 2025-03-31 04:00:00+00:00 to 2025-03-31 04:00:00+00:00
+2025-03-31 16:17:00,730 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:17:00,731 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:17:00,744 - INFO - Preprocessing finished. Final shape: (1, 15)
+2025-03-31 16:17:00,744 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:17:00,744 - INFO - Date range: 2025-03-31 04:00:00+00:00 to 2025-03-31 04:00:00+00:00
+2025-03-31 16:17:00,744 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:17:00,745 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:17:00,758 - INFO - Preprocessing finished. Final shape: (1, 15)
+2025-03-31 16:17:00,758 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:17:00,758 - INFO - Date range: 2025-03-31 04:00:00+00:00 to 2025-03-31 04:00:00+00:00
+2025-03-31 16:17:00,759 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:17:00,759 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:17:00,771 - INFO - Preprocessing finished. Final shape: (1, 15)
+2025-03-31 16:17:00,772 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:17:00,772 - INFO - Date range: 2025-03-31 04:00:00+00:00 to 2025-03-31 04:00:00+00:00
+2025-03-31 16:17:00,772 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:17:00,773 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:17:00,785 - INFO - Preprocessing finished. Final shape: (1, 15)
+2025-03-31 16:17:00,785 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:17:00,786 - INFO - Date range: 2025-03-31 04:00:00+00:00 to 2025-03-31 04:00:00+00:00
+2025-03-31 16:17:00,786 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:17:00,787 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:17:00,799 - INFO - Preprocessing finished. Final shape: (1, 15)
+2025-03-31 16:17:00,799 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:17:00,799 - INFO - Date range: 2025-03-31 04:00:00+00:00 to 2025-03-31 04:00:00+00:00
+2025-03-31 16:17:00,802 - INFO - Preprocessing complete. Processed data shape: (10, 15)
+2025-03-31 16:17:00,802 - INFO - Latest date in processed data: 2025-03-31 04:00:00+00:00
+2025-03-31 16:17:00,942 - INFO - Current Cash: 98842.69, Holdings: {}
+2025-03-31 16:17:00,945 - INFO - State constructed for prediction. Shape: (131,)
+2025-03-31 16:17:00,963 - INFO - Predicted Action: [-1.38562575e-01  2.89732158e-01 -2.16410495e-04  8.77005905e-02
+ -1.31852264e-02 -1.58427462e-01  2.67162532e-01  1.22132204e-01
+ -4.59023938e-02 -1.46526217e-01]
+2025-03-31 16:17:01,003 - INFO - Calculating desired trades based on action...
+2025-03-31 16:17:01,004 - INFO - ORDER PREP: Buy 28 shares of MSFT at market (Current Holding: 0, Est Price: 375.5).
+2025-03-31 16:17:01,004 - INFO - ORDER PREP: Buy 8 shares of AMZN at market (Current Holding: 0, Est Price: 244.5).
+2025-03-31 16:17:01,004 - INFO - ORDER PREP: Buy 26 shares of TSLA at market (Current Holding: 0, Est Price: 288).
+2025-03-31 16:17:01,004 - INFO - ORDER PREP: Buy 12 shares of INTC at market (Current Holding: 0, Est Price: 22.72).
+2025-03-31 16:17:01,004 - INFO - Submitting 4 orders...
+2025-03-31 16:17:01,005 - INFO - Submitting order: {'symbol': 'MSFT', 'qty': 28, 'side': 'buy', 'type': 'market', 'time_in_force': 'day'}
+2025-03-31 16:17:01,005 - ERROR - Unexpected error submitting order for MSFT: Object of type int64 is not JSON serializable
+Traceback (most recent call last):
+  File "/app/workspaces/FinRL-Tutorials/alpaca_trading_agent/src/trading/alpaca_papertrader.py", line 276, in run_trading_logic
+    submitted_order = api.submit_order(**order_data)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/alpaca_trade_api/rest.py", line 433, in submit_order
+    resp = self.post('/orders', params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/alpaca_trade_api/rest.py", line 257, in post
+    return self._request('POST', path, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/alpaca_trade_api/rest.py", line 222, in _request
+    return self._one_request(method, url, opts, retry)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/alpaca_trade_api/rest.py", line 241, in _one_request
+    resp = self._session.request(method, url, **opts)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/requests/sessions.py", line 575, in request
+    prep = self.prepare_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/requests/sessions.py", line 484, in prepare_request
+    p.prepare(
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/requests/models.py", line 370, in prepare
+    self.prepare_body(data, files, json)
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/requests/models.py", line 510, in prepare_body
+    body = complexjson.dumps(json, allow_nan=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/simplejson/__init__.py", line 378, in dumps
+    return _default_encoder.encode(obj)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/simplejson/encoder.py", line 298, in encode
+    chunks = self.iterencode(o)
+             ^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/simplejson/encoder.py", line 379, in iterencode
+    return _iterencode(o, 0)
+           ^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/simplejson/encoder.py", line 274, in default
+    raise TypeError('Object of type %s is not JSON serializable' %
+TypeError: Object of type int64 is not JSON serializable
+2025-03-31 16:17:01,015 - INFO - Submitting order: {'symbol': 'AMZN', 'qty': 8, 'side': 'buy', 'type': 'market', 'time_in_force': 'day'}
+2025-03-31 16:17:01,015 - ERROR - Unexpected error submitting order for AMZN: Object of type int64 is not JSON serializable
+Traceback (most recent call last):
+  File "/app/workspaces/FinRL-Tutorials/alpaca_trading_agent/src/trading/alpaca_papertrader.py", line 276, in run_trading_logic
+    submitted_order = api.submit_order(**order_data)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/alpaca_trade_api/rest.py", line 433, in submit_order
+    resp = self.post('/orders', params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/alpaca_trade_api/rest.py", line 257, in post
+    return self._request('POST', path, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/alpaca_trade_api/rest.py", line 222, in _request
+    return self._one_request(method, url, opts, retry)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/alpaca_trade_api/rest.py", line 241, in _one_request
+    resp = self._session.request(method, url, **opts)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/requests/sessions.py", line 575, in request
+    prep = self.prepare_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/requests/sessions.py", line 484, in prepare_request
+    p.prepare(
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/requests/models.py", line 370, in prepare
+    self.prepare_body(data, files, json)
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/requests/models.py", line 510, in prepare_body
+    body = complexjson.dumps(json, allow_nan=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/simplejson/__init__.py", line 378, in dumps
+    return _default_encoder.encode(obj)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/simplejson/encoder.py", line 298, in encode
+    chunks = self.iterencode(o)
+             ^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/simplejson/encoder.py", line 379, in iterencode
+    return _iterencode(o, 0)
+           ^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/simplejson/encoder.py", line 274, in default
+    raise TypeError('Object of type %s is not JSON serializable' %
+TypeError: Object of type int64 is not JSON serializable
+2025-03-31 16:17:01,016 - INFO - Submitting order: {'symbol': 'TSLA', 'qty': 26, 'side': 'buy', 'type': 'market', 'time_in_force': 'day'}
+2025-03-31 16:17:01,016 - ERROR - Unexpected error submitting order for TSLA: Object of type int64 is not JSON serializable
+Traceback (most recent call last):
+  File "/app/workspaces/FinRL-Tutorials/alpaca_trading_agent/src/trading/alpaca_papertrader.py", line 276, in run_trading_logic
+    submitted_order = api.submit_order(**order_data)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/alpaca_trade_api/rest.py", line 433, in submit_order
+    resp = self.post('/orders', params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/alpaca_trade_api/rest.py", line 257, in post
+    return self._request('POST', path, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/alpaca_trade_api/rest.py", line 222, in _request
+    return self._one_request(method, url, opts, retry)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/alpaca_trade_api/rest.py", line 241, in _one_request
+    resp = self._session.request(method, url, **opts)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/requests/sessions.py", line 575, in request
+    prep = self.prepare_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/requests/sessions.py", line 484, in prepare_request
+    p.prepare(
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/requests/models.py", line 370, in prepare
+    self.prepare_body(data, files, json)
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/requests/models.py", line 510, in prepare_body
+    body = complexjson.dumps(json, allow_nan=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/simplejson/__init__.py", line 378, in dumps
+    return _default_encoder.encode(obj)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/simplejson/encoder.py", line 298, in encode
+    chunks = self.iterencode(o)
+             ^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/simplejson/encoder.py", line 379, in iterencode
+    return _iterencode(o, 0)
+           ^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/simplejson/encoder.py", line 274, in default
+    raise TypeError('Object of type %s is not JSON serializable' %
+TypeError: Object of type int64 is not JSON serializable
+2025-03-31 16:17:01,017 - INFO - Submitting order: {'symbol': 'INTC', 'qty': 12, 'side': 'buy', 'type': 'market', 'time_in_force': 'day'}
+2025-03-31 16:17:01,017 - ERROR - Unexpected error submitting order for INTC: Object of type int64 is not JSON serializable
+Traceback (most recent call last):
+  File "/app/workspaces/FinRL-Tutorials/alpaca_trading_agent/src/trading/alpaca_papertrader.py", line 276, in run_trading_logic
+    submitted_order = api.submit_order(**order_data)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/alpaca_trade_api/rest.py", line 433, in submit_order
+    resp = self.post('/orders', params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/alpaca_trade_api/rest.py", line 257, in post
+    return self._request('POST', path, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/alpaca_trade_api/rest.py", line 222, in _request
+    return self._one_request(method, url, opts, retry)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/alpaca_trade_api/rest.py", line 241, in _one_request
+    resp = self._session.request(method, url, **opts)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/requests/sessions.py", line 575, in request
+    prep = self.prepare_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/requests/sessions.py", line 484, in prepare_request
+    p.prepare(
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/requests/models.py", line 370, in prepare
+    self.prepare_body(data, files, json)
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/requests/models.py", line 510, in prepare_body
+    body = complexjson.dumps(json, allow_nan=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/simplejson/__init__.py", line 378, in dumps
+    return _default_encoder.encode(obj)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/simplejson/encoder.py", line 298, in encode
+    chunks = self.iterencode(o)
+             ^^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/simplejson/encoder.py", line 379, in iterencode
+    return _iterencode(o, 0)
+           ^^^^^^^^^^^^^^^^^
+  File "/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/simplejson/encoder.py", line 274, in default
+    raise TypeError('Object of type %s is not JSON serializable' %
+TypeError: Object of type int64 is not JSON serializable
+2025-03-31 16:17:01,017 - INFO - --- Trading Logic Cycle Finished ---
+2025-03-31 16:19:41,026 - INFO - --- Starting Alpaca Paper Trading Agent ---
+2025-03-31 16:19:41,026 - INFO - Connecting to Alpaca API...
+2025-03-31 16:19:41,195 - INFO - Connected successfully. Account Status: ACTIVE
+2025-03-31 16:19:41,195 - INFO - Loading trained model from: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/results/models/PPO_1D_20000.zip
+2025-03-31 16:19:42,520 - INFO - Model loaded successfully.
+2025-03-31 16:19:42,521 - INFO - --- Running Trading Logic Cycle ---
+2025-03-31 16:19:42,521 - INFO - Fetching latest data for 10 tickers, lookback 60 days.
+2025-03-31 16:19:42,801 - INFO - Fetched 410 bars.
+2025-03-31 16:19:42,806 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:19:42,807 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:19:42,826 - INFO - Preprocessing finished. Final shape: (1, 15)
+2025-03-31 16:19:42,826 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:19:42,826 - INFO - Date range: 2025-03-31 04:00:00+00:00 to 2025-03-31 04:00:00+00:00
+2025-03-31 16:19:42,827 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:19:42,827 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:19:42,840 - INFO - Preprocessing finished. Final shape: (1, 15)
+2025-03-31 16:19:42,840 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:19:42,840 - INFO - Date range: 2025-03-31 04:00:00+00:00 to 2025-03-31 04:00:00+00:00
+2025-03-31 16:19:42,841 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:19:42,842 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:19:42,856 - INFO - Preprocessing finished. Final shape: (1, 15)
+2025-03-31 16:19:42,856 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:19:42,856 - INFO - Date range: 2025-03-31 04:00:00+00:00 to 2025-03-31 04:00:00+00:00
+2025-03-31 16:19:42,857 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:19:42,857 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:19:42,873 - INFO - Preprocessing finished. Final shape: (1, 15)
+2025-03-31 16:19:42,873 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:19:42,873 - INFO - Date range: 2025-03-31 04:00:00+00:00 to 2025-03-31 04:00:00+00:00
+2025-03-31 16:19:42,874 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:19:42,874 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:19:42,890 - INFO - Preprocessing finished. Final shape: (1, 15)
+2025-03-31 16:19:42,890 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:19:42,890 - INFO - Date range: 2025-03-31 04:00:00+00:00 to 2025-03-31 04:00:00+00:00
+2025-03-31 16:19:42,891 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:19:42,892 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:19:42,907 - INFO - Preprocessing finished. Final shape: (1, 15)
+2025-03-31 16:19:42,907 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:19:42,908 - INFO - Date range: 2025-03-31 04:00:00+00:00 to 2025-03-31 04:00:00+00:00
+2025-03-31 16:19:42,908 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:19:42,909 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:19:42,925 - INFO - Preprocessing finished. Final shape: (1, 15)
+2025-03-31 16:19:42,925 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:19:42,925 - INFO - Date range: 2025-03-31 04:00:00+00:00 to 2025-03-31 04:00:00+00:00
+2025-03-31 16:19:42,926 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:19:42,926 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:19:42,943 - INFO - Preprocessing finished. Final shape: (1, 15)
+2025-03-31 16:19:42,943 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:19:42,943 - INFO - Date range: 2025-03-31 04:00:00+00:00 to 2025-03-31 04:00:00+00:00
+2025-03-31 16:19:42,944 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:19:42,945 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:19:42,961 - INFO - Preprocessing finished. Final shape: (1, 15)
+2025-03-31 16:19:42,961 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:19:42,962 - INFO - Date range: 2025-03-31 04:00:00+00:00 to 2025-03-31 04:00:00+00:00
+2025-03-31 16:19:42,963 - INFO - Starting preprocessing. Initial shape: (41, 10)
+2025-03-31 16:19:42,963 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:19:42,980 - INFO - Preprocessing finished. Final shape: (1, 15)
+2025-03-31 16:19:42,981 - INFO - Columns: ['date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-03-31 16:19:42,981 - INFO - Date range: 2025-03-31 04:00:00+00:00 to 2025-03-31 04:00:00+00:00
+2025-03-31 16:19:42,985 - INFO - Preprocessing complete. Processed data shape: (10, 15)
+2025-03-31 16:19:42,985 - INFO - Latest date in processed data: 2025-03-31 04:00:00+00:00
+2025-03-31 16:19:43,087 - INFO - Current Cash: 98842.69, Holdings: {}
+2025-03-31 16:19:43,091 - INFO - State constructed for prediction. Shape: (131,)
+2025-03-31 16:19:43,107 - INFO - Predicted Action: [-1.38562575e-01  2.89732158e-01 -2.16410495e-04  8.77005905e-02
+ -1.31852264e-02 -1.58427462e-01  2.67162532e-01  1.22132204e-01
+ -4.59023938e-02 -1.46526217e-01]
+2025-03-31 16:19:43,147 - INFO - Calculating desired trades based on action...
+2025-03-31 16:19:43,147 - INFO - ORDER PREP: Buy 28 shares of MSFT at market (Current Holding: 0, Est Price: 375.5).
+2025-03-31 16:19:43,148 - INFO - ORDER PREP: Buy 8 shares of AMZN at market (Current Holding: 0, Est Price: 244.5).
+2025-03-31 16:19:43,148 - INFO - ORDER PREP: Buy 26 shares of TSLA at market (Current Holding: 0, Est Price: 288).
+2025-03-31 16:19:43,148 - INFO - ORDER PREP: Buy 12 shares of INTC at market (Current Holding: 0, Est Price: 22.72).
+2025-03-31 16:19:43,148 - INFO - Submitting 4 orders...
+2025-03-31 16:19:43,148 - INFO - Submitting order: {'symbol': 'MSFT', 'qty': 28, 'side': 'buy', 'type': 'market', 'time_in_force': 'day'}
+2025-03-31 16:19:43,198 - INFO - Order submitted for MSFT. Order ID: e026ff88-2b9f-4ba8-9e81-ec4fa484a256, Status: accepted
+2025-03-31 16:19:43,302 - INFO - Submitting order: {'symbol': 'AMZN', 'qty': 8, 'side': 'buy', 'type': 'market', 'time_in_force': 'day'}
+2025-03-31 16:19:43,371 - INFO - Order submitted for AMZN. Order ID: 909d9c4e-fa59-4368-be5d-d6da6ea51f16, Status: accepted
+2025-03-31 16:19:43,476 - INFO - Submitting order: {'symbol': 'TSLA', 'qty': 26, 'side': 'buy', 'type': 'market', 'time_in_force': 'day'}
+2025-03-31 16:19:43,522 - INFO - Order submitted for TSLA. Order ID: 4746f7bd-e27c-4cd1-8065-99e0090b6bb4, Status: accepted
+2025-03-31 16:19:43,624 - INFO - Submitting order: {'symbol': 'INTC', 'qty': 12, 'side': 'buy', 'type': 'market', 'time_in_force': 'day'}
+2025-03-31 16:19:43,667 - INFO - Order submitted for INTC. Order ID: e5f06683-98aa-4f28-aa19-4bcdd240ee1a, Status: accepted
+2025-03-31 16:19:43,772 - INFO - --- Trading Logic Cycle Finished ---
+2025-03-31 16:22:37,694 - INFO - --- Starting Alpaca Paper Trading Agent ---
+2025-03-31 16:22:37,696 - INFO - Connecting to Alpaca API...
+2025-03-31 16:22:37,923 - INFO - Connected successfully. Account Status: ACTIVE
+2025-03-31 16:22:37,924 - INFO - Loading trained model from: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/results/models/PPO_1D_20000.zip
+2025-03-31 16:22:39,130 - INFO - Model loaded successfully.
+2025-03-31 16:22:39,131 - INFO - Scheduling trading logic to run daily at 15:45 EST/EDT.
+2025-03-31 16:22:39,136 - INFO - Scheduler started. Waiting for scheduled jobs...
+2025-03-31 16:22:57,479 - INFO - --- Starting Alpaca Paper Trading Agent ---
+2025-03-31 16:22:57,479 - INFO - Connecting to Alpaca API...
+2025-03-31 16:22:57,681 - INFO - Connected successfully. Account Status: ACTIVE
+2025-03-31 16:22:57,682 - INFO - Loading trained model from: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/results/models/PPO_1D_20000.zip
+2025-03-31 16:22:58,381 - INFO - Model loaded successfully.
+2025-03-31 16:22:58,382 - INFO - Scheduling trading logic to run daily at 15:45 EST/EDT.
+2025-03-31 16:22:58,387 - INFO - Scheduler started. Waiting for scheduled jobs...
+2025-03-31 16:24:31,753 - INFO - --- Starting Alpaca Paper Trading Agent ---
+2025-03-31 16:24:31,753 - INFO - Connecting to Alpaca API...
+2025-03-31 16:24:31,933 - INFO - Connected successfully. Account Status: ACTIVE
+2025-03-31 16:24:31,933 - INFO - Loading trained model from: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/results/models/PPO_1D_20000.zip
+2025-03-31 16:24:33,039 - INFO - Model loaded successfully.
+2025-03-31 16:24:33,039 - INFO - Scheduling trading logic to run daily at 15:45 EST/EDT.
+2025-03-31 16:24:33,045 - INFO - Scheduler started. Waiting for scheduled jobs...
