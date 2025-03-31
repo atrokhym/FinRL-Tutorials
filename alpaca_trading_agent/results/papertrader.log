@@ -1,0 +1,14 @@
+2025-03-30 19:02:32,110 - INFO - --- Starting Alpaca Paper Trading Agent ---
+2025-03-30 19:02:32,110 - INFO - Connecting to Alpaca API...
+2025-03-30 19:02:32,359 - INFO - Connected successfully. Account Status: ACTIVE
+2025-03-30 19:02:32,360 - INFO - Loading trained model from: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/results/models/PPO_1D_20000.zip
+2025-03-30 19:02:33,050 - INFO - Model loaded successfully.
+2025-03-30 19:02:33,050 - INFO - Scheduling trading logic to run daily at 15:45 EST/EDT.
+2025-03-30 19:02:33,070 - INFO - Scheduler started. Waiting for scheduled jobs...
+2025-03-30 21:00:36,174 - INFO - --- Starting Alpaca Paper Trading Agent ---
+2025-03-30 21:00:36,175 - INFO - Connecting to Alpaca API...
+2025-03-30 21:00:36,409 - INFO - Connected successfully. Account Status: ACTIVE
+2025-03-30 21:00:36,409 - INFO - Loading trained model from: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/results/models/PPO_1D_20000.zip
+2025-03-30 21:00:37,619 - INFO - Model loaded successfully.
+2025-03-30 21:00:37,619 - INFO - Scheduling trading logic to run daily at 15:45 EST/EDT.
+2025-03-30 21:00:37,632 - INFO - Scheduler started. Waiting for scheduled jobs...

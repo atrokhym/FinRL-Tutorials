@@ -1,0 +1,13 @@
+# Core RL and Trading
+finrl
+alpaca-trade-api
+pandas
+numpy
+pyfolio # For backtesting analysis
+matplotlib # For plotting
+
+# Add other dependencies as needed, e.g., for specific models or UI
+# stable-baselines3
+# tensorflow
+# torch
+# streamlit / dash

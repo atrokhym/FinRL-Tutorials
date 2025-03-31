@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Data & Results (optional, depends if you want to commit them)
+# data/
+# results/
+# logs/
+
+# IDE specific
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Secrets - IMPORTANT
+config/api_keys.py
+*.env
+
+# OS specific
+.DS_Store
+Thumbs.db
