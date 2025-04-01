@@ -63,7 +63,7 @@ except ImportError as e:
     sys.exit(1)
 
 # --- Tuning Parameters ---
-N_TRIALS = 20 # Number of Optuna trials to run
+N_TRIALS = 50 # Number of Optuna trials to run (Increased from 20)
 TUNING_TIMESTEPS = 10000 # Timesteps per trial (reduced for faster tuning)
 VALIDATION_SPLIT_RATIO = 0.8 # Use 80% for training, 20% for validation within the trial
 
@@ -116,8 +116,18 @@ def objective(trial: optuna.Trial) -> float:
     gamma = trial.suggest_float("gamma", 0.9, 0.9999)
     ent_coef = trial.suggest_float("ent_coef", 0.0, 0.1)
     clip_range = trial.suggest_categorical("clip_range", [0.1, 0.2, 0.3])
-    # net_arch = trial.suggest_categorical("net_arch", ["small", "medium"]) # Example: Needs mapping
-    # policy_kwargs = dict(net_arch=[dict(pi=[64, 64], vf=[64, 64])]) # Example
+
+    # --- Add net_arch tuning ---
+    net_arch_str = trial.suggest_categorical("net_arch", ["small", "medium"]) # Keep it simple initially: [64, 64] vs [128, 128]
+    if net_arch_str == "small":
+        # Default SB3 PPO MlpPolicy architecture
+        policy_kwargs = dict(net_arch=dict(pi=[64, 64], vf=[64, 64]))
+    elif net_arch_str == "medium":
+        policy_kwargs = dict(net_arch=dict(pi=[128, 128], vf=[128, 128]))
+    # Add more options like "large" ([256, 256]) if desired
+    # else: # large
+    #     policy_kwargs = dict(net_arch=dict(pi=[256, 256], vf=[256, 256]))
+    # --- End net_arch tuning ---
 
     # 2. Create Training Environment
     try:
@@ -142,9 +152,9 @@ def objective(trial: optuna.Trial) -> float:
         "max_grad_norm": 0.5, # Keep fixed or tune?
         "learning_rate": learning_rate,
         "verbose": 0, # Reduce verbosity during tuning
-        "seed": 42 + trial.number, # Use different seed per trial
-        "device": "auto"
-        # "policy_kwargs": policy_kwargs # If tuning net_arch
+        "seed": SEED + trial.number, # Use different seed per trial (Use defined SEED)
+        "device": "auto",
+        "policy_kwargs": policy_kwargs # Pass the suggested network architecture
     }
 
     try:
