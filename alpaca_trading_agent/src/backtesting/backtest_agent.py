@@ -22,8 +22,20 @@ SRC_DIR = os.path.join(PROJECT_ROOT, 'src')
 import sys
 sys.path.insert(0, CONFIG_DIR)
 sys.path.insert(0, os.path.join(SRC_DIR, 'environment')) # To import trading_env
+import settings # Import settings after adding config dir to path
 
-# --- Argument Parsing and Logging Setup ---
+# --- Argument Parsing ---
+parser = argparse.ArgumentParser(description="Run backtesting for the Alpaca Trading Agent.")
+parser.add_argument(
+    '--log-level',
+    type=str,
+    default='INFO',
+    help='Set the logging level (e.g., DEBUG, INFO, WARNING, ERROR, CRITICAL)'
+)
+args = parser.parse_args()
+
+# --- Logging Setup ---
+# Call setup_logging immediately after parsing args
 def setup_logging(level_str="INFO"):
     """Configures logging for this script."""
     level = getattr(logging, level_str.upper(), logging.INFO)
@@ -36,8 +48,15 @@ def setup_logging(level_str="INFO"):
     # Set higher level for noisy libraries like matplotlib
     logging.getLogger('matplotlib').setLevel(logging.WARNING)
     logging.getLogger('matplotlib.font_manager').setLevel(logging.WARNING) # Be specific if needed
-    logging.info(f"Backtest Agent root logging configured to level: {level_str.upper()}") # Changed message slightly for clarity
+    logging.info(f"Backtest Agent root logging configured to level: {level_str.upper()}")
     logging.info(f"Matplotlib logging level set to WARNING to reduce verbosity.")
+
+# Setup logging using the parsed argument
+setup_logging(args.log_level)
+
+# --- Load Configuration Settings ---
+# Moved settings import after path setup and logging setup
+# import settings # Already imported above
 
 
 parser = argparse.ArgumentParser(description="Alpaca Trading Agent Backtester")
@@ -128,6 +147,7 @@ actions_list = [] # Store actions
 state_memory = [] # Store state before action for debugging
 
 obs, info = env_test_instance.reset()
+initial_day_index = env_test_instance.day # Capture the starting day index AFTER reset
 initial_value = env_test_instance.initial_amount
 account_value_list.append(initial_value) # Start with initial amount
 logging.debug(f"--- Backtest Start ---")
@@ -255,12 +275,48 @@ logging.info("Calculating performance metrics...")
 
 # Create DataFrame from results
 account_value_df = pd.DataFrame({'account_value': account_value_list})
-# Get unique dates from the test period actually used by the environment
-# The environment starts at the first valid day, which might not be test_df['date'].min()
-start_day_index = env_test_instance.day - len(account_value_list) + 1 # Infer start day index used
-test_dates = env_test_instance.date_index[start_day_index : start_day_index + len(account_value_list)]
-account_value_df['date'] = pd.to_datetime(test_dates)
-account_value_df = account_value_df.set_index('date')
+# Align dates with account values. account_value_list has N+1 items (initial + N steps).
+num_steps = len(account_value_list) - 1
+test_dates = [] # Initialize
+
+if num_steps < 0:
+    logging.error("Account value list has insufficient data for date alignment.")
+    # Cannot proceed with date-based analysis if no steps were taken or list is malformed.
+    # Set account_value_df index to simple range to avoid downstream errors expecting an index.
+    account_value_df.index = pd.RangeIndex(start=0, stop=len(account_value_df))
+
+elif initial_day_index + num_steps > len(env_test_instance.date_index):
+     logging.error(f"Date alignment error: Required end index {initial_day_index + num_steps} exceeds date_index length {len(env_test_instance.date_index)}.")
+     # Cannot proceed reliably. Set simple index.
+     account_value_df.index = pd.RangeIndex(start=0, stop=len(account_value_df))
+
+else:
+    # Get dates corresponding to the *end* of each step
+    step_dates_slice = slice(initial_day_index, initial_day_index + num_steps)
+    step_dates = env_test_instance.date_index[step_dates_slice]
+
+    if len(step_dates) != num_steps:
+        logging.warning(f"Date slicing mismatch during backtest processing: Expected {num_steps} step dates, got {len(step_dates)}. Slice was {step_dates_slice}.")
+        # If slicing failed, we cannot reliably create a date index.
+        account_value_df.index = pd.RangeIndex(start=0, stop=len(account_value_df))
+    else:
+        # Use the first step's date for the initial account value timestamp
+        initial_date_for_df = step_dates[0]
+        test_dates = [initial_date_for_df] + step_dates.tolist() # Combine initial date + step dates
+
+        if len(test_dates) == len(account_value_df):
+            account_value_df['date'] = pd.to_datetime(test_dates)
+            account_value_df = account_value_df.set_index('date')
+            logging.info("Successfully aligned dates and set date index.")
+        else:
+            # This case should ideally not happen with the new logic, but check just in case.
+            logging.error(f"CRITICAL: Final date alignment mismatch. Values: {len(account_value_list)}, Dates: {len(test_dates)}. Setting simple range index.")
+            account_value_df.index = pd.RangeIndex(start=0, stop=len(account_value_df))
+
+# Ensure account_value_df has an index before proceeding
+if account_value_df.index is None:
+     logging.warning("Account value DataFrame index is None after date alignment attempt. Setting simple range index.")
+     account_value_df.index = pd.RangeIndex(start=0, stop=len(account_value_df))
 
 logging.info(f"Account Value DF shape: {account_value_df.shape}")
 logging.info(account_value_df.head())

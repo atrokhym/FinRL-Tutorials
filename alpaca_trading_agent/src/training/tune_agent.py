@@ -11,6 +11,32 @@ from stable_baselines3.common.logger import configure as sb3_configure_logger
 import time
 import json # Added for JSON output
 
+import random
+# Assuming Stable Baselines3 uses PyTorch by default
+import torch
+
+# --- Seed for Reproducibility ---
+SEED = 42 # You can change this value
+random.seed(SEED)
+np.random.seed(SEED)
+torch.manual_seed(SEED)
+# If using CUDA (GPU)
+if torch.cuda.is_available():
+    torch.cuda.manual_seed(SEED)
+    torch.cuda.manual_seed_all(SEED) # if use multi-GPU
+    # These settings can enforce determinism but might impact performance
+    # torch.backends.cudnn.deterministic = True
+    # torch.backends.cudnn.benchmark = False
+# Set PYTHONHASHSEED environment variable (optional, affects hash randomization)
+# Note: This needs to be set *before* Python starts for full effect,
+# so setting it here might only have partial impact depending on execution context.
+# Consider setting it in the shell environment if strict hash reproducibility is needed.
+# import os
+# os.environ['PYTHONHASHSEED'] = str(SEED)
+
+logging.info(f"Global random seeds set to: {SEED}")
+
+
 # --- Configuration and Environment Loading ---
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 CONFIG_DIR = os.path.join(PROJECT_ROOT, 'config')

@@ -1,0 +1,11 @@
+{
+    "learning_rate": 0.00010667730342036526,
+    "n_steps": 2048,
+    "batch_size": 32,
+    "gamma": 0.9541844100197306,
+    "ent_coef": 0.014733819183403954,
+    "clip_range": 0.1,
+    "_study_name": "ppo-tuning-1D-1743528608",
+    "_best_trial_number": 19,
+    "_best_value": 79262.9143517685
+}

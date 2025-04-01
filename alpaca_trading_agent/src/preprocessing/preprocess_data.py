@@ -37,10 +37,12 @@ def preprocess_data(df):
      Args:
          df (pd.DataFrame): Raw data with columns like ['open', 'high', 'low', 'close', 'volume', 'tic'].
                             Index should be datetime. It should contain enough historical rows for indicator calculation.
-
+         is_live_trading (bool, optional): If True, selects only the last row for prediction. Defaults to False.
+ 
      Returns:
-        pd.DataFrame: Processed DataFrame ready for FinRL.
-    """
+         pd.DataFrame | None: Processed DataFrame ready for FinRL, or None if error.
+     """
+def preprocess_data(df: pd.DataFrame, is_live_trading: bool = False) -> pd.DataFrame | None:
     logging.info(f"Starting preprocessing. Initial shape: {df.shape}")
 
     # Convert index to datetime if it's not already (it should be from fetch_data)
@@ -84,12 +86,31 @@ def preprocess_data(df):
     # Ensure correct column naming and order for FinRL (often expects 'date' column)
     # df = df.reset_index().rename(columns={'index': 'date'}) # Removed: 'date' column should already exist from fetch_latest_data
 
-    # Select only the last row for the current state
-    if not df.empty:
-        df = df.iloc[[-1]].reset_index(drop=True) # Select last row and reset index
+    # --- Ensure 'date' column exists by resetting index ---
+    # This needs to happen regardless of live trading or not, before sorting.
+    original_index_name = df.index.name # Store original index name if it exists
+    df = df.reset_index() # Reset index, making it a column
+    # Rename the index column to 'date'. Common names are 'timestamp' or None (becomes 'index')
+    index_col_name = original_index_name if original_index_name else 'index' # Default name is 'index' if unnamed
+    if index_col_name in df.columns and 'date' not in df.columns:
+        df = df.rename(columns={index_col_name: 'date'})
+        logging.info(f"Renamed index column '{index_col_name}' to 'date'.")
+    elif 'date' not in df.columns:
+         # If rename didn't happen and 'date' still missing, log error
+         logging.error(f"Could not find or create 'date' column from index '{index_col_name}'. Columns: {df.columns.tolist()}")
+         return None
+
+    # --- Select only the last row IF in live trading mode ---
+    if is_live_trading:
+        logging.info("Preprocessing for live trading: Selecting last row.")
+        if not df.empty:
+            df = df.iloc[[-1]].reset_index(drop=True) # Select last row and reset its new index
+        else:
+            # This case might be less likely now, but keep for safety
+            logging.warning("DataFrame became empty before selecting last row.")
+            return None
     else:
-        logging.warning("DataFrame became empty after indicator calculation/ffill. Cannot select last row.")
-        return None # Return None if empty
+         logging.info("Preprocessing for training/backtesting: Using full timeseries.")
 
     # Ensure 'tic' column exists
     if 'tic' not in df.columns:
@@ -97,7 +118,11 @@ def preprocess_data(df):
         return None
 
     # Sort by date and ticker - crucial for FinRL environments
-    df = df.sort_values(by=['date', 'tic']).reset_index(drop=True)
+    if 'date' in df.columns and 'tic' in df.columns:
+        df = df.sort_values(by=['date', 'tic']).reset_index(drop=True)
+    else:
+        logging.error(f"Required columns ('date', 'tic') not found for sorting. Columns: {df.columns.tolist()}")
+        return None
 
     logging.info(f"Preprocessing finished. Final shape: {df.shape}")
     logging.info(f"Columns: {df.columns.tolist()}")
