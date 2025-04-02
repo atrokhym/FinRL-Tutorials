@@ -86,25 +86,54 @@ os.makedirs(BACKTEST_RESULTS_DIR, exist_ok=True)
 # Use the same model details as training for consistency
 MODEL_ALGO = "PPO"
 TOTAL_TIMESTEPS = 20000 # From training run
-MODEL_FILENAME_BASE = f"{MODEL_ALGO}_{settings.TIME_INTERVAL}_{TOTAL_TIMESTEPS}"
-MODEL_PATH = os.path.join(RESULTS_DIR, 'models', f"{MODEL_FILENAME_BASE}.zip")
 
-# --- Load Processed Test Data ---
-processed_test_filename = f"test_processed_{settings.TEST_START_DATE}_{settings.TEST_END_DATE}.csv"
-processed_test_filepath = os.path.join(DATA_DIR, processed_test_filename)
+# Check for Walk-Forward model suffix
+model_suffix = os.environ.get('WF_MODEL_SUFFIX', '')
+if model_suffix:
+    logging.info(f"Using Walk-Forward model suffix: {model_suffix}")
+
+MODEL_FILENAME_BASE = f"{MODEL_ALGO}_{settings.TIME_INTERVAL}_{TOTAL_TIMESTEPS}{model_suffix}"
+MODEL_PATH = os.path.join(RESULTS_DIR, 'models', f"{MODEL_FILENAME_BASE}.zip") # Use suffixed base
+
+# --- Load Processed Test Data (and filter for Walk-Forward) ---
+full_processed_filename = "full_processed_combined.csv"
+full_processed_filepath = os.path.join(DATA_DIR, full_processed_filename)
+
+# Check for Walk-Forward override environment variables
+test_start_override = os.environ.get('WF_OVERRIDE_TEST_START')
+test_end_override = os.environ.get('WF_OVERRIDE_TEST_END')
 
 try:
-    test_df = pd.read_csv(processed_test_filepath)
-    test_df['date'] = pd.to_datetime(test_df['date'])
-    # Sort and reset index for consistency with how env expects data
-    test_df = test_df.sort_values(by=['date', 'tic']).reset_index(drop=True)
-    logging.info(f"Loaded processed testing data: {processed_test_filepath}")
+    full_df = pd.read_csv(full_processed_filepath)
+    full_df['date'] = pd.to_datetime(full_df['date'])
+    full_df = full_df.sort_values(by=['date', 'tic']).reset_index(drop=True)
+    logging.info(f"Loaded full processed data: {full_processed_filepath}")
+
+    # Filter data for the current testing window
+    if test_start_override and test_end_override:
+        logging.info(f"Applying Walk-Forward date overrides: Test Start={test_start_override}, Test End={test_end_override}")
+        test_start_dt = pd.to_datetime(test_start_override)
+        test_end_dt = pd.to_datetime(test_end_override)
+        test_df = full_df[(full_df['date'] >= test_start_dt) & (full_df['date'] <= test_end_dt)].reset_index(drop=True)
+    else:
+        # Default behavior: Use TEST_START_DATE and TEST_END_DATE from settings
+        logging.info("No Walk-Forward overrides found. Using default TEST dates from settings.")
+        test_start_dt = pd.to_datetime(settings.TEST_START_DATE)
+        test_end_dt = pd.to_datetime(settings.TEST_END_DATE)
+        test_df = full_df[(full_df['date'] >= test_start_dt) & (full_df['date'] <= test_end_dt)].reset_index(drop=True)
+
+    if test_df.empty:
+        logging.error(f"Testing data is empty after filtering for dates {test_start_dt} to {test_end_dt}. Check date ranges.")
+        sys.exit(1)
+
+    logging.info(f"Using testing data for period: {test_df['date'].min()} to {test_df['date'].max()}. Shape: {test_df.shape}")
+
 except FileNotFoundError:
-    logging.error(f"Processed testing data file not found: {processed_test_filepath}")
+    logging.error(f"Full processed data file not found: {full_processed_filepath}")
     logging.error("Please run the preprocessing script first.")
     sys.exit(1)
 except Exception as e:
-    logging.error(f"Error loading processed testing data: {e}")
+    logging.error(f"Error loading or filtering processed testing data: {e}") # Updated error message
     sys.exit(1)
 
 # --- Create Test Environment ---
@@ -118,8 +147,8 @@ except Exception as e:
     logging.error(f"Failed to create testing environment: {e}", exc_info=True)
     sys.exit(1)
 
-# --- Load Trained Model ---
-logging.info(f"Loading trained model from: {MODEL_PATH}")
+# --- Load Trained Model (using potentially suffixed name) ---
+logging.info(f"Loading trained model from: {MODEL_PATH}") # Path already includes suffix
 try:
     # We don't need to pass env here if we're only predicting
     model = PPO.load(MODEL_PATH, env=None)
@@ -371,7 +400,9 @@ try:
     stats_str = backtest_stats(account_value=account_value_df_for_finrl, value_col_name='account_value')
     print("\n--- Backtesting Performance Stats ---")
     print(stats_str)
-    stats_path = os.path.join(BACKTEST_RESULTS_DIR, f"{MODEL_FILENAME_BASE}_backtest_stats.txt")
+    # Save stats using potentially suffixed name
+    stats_filename = f"{MODEL_FILENAME_BASE}_backtest_stats.txt" # Base already includes suffix
+    stats_path = os.path.join(BACKTEST_RESULTS_DIR, stats_filename)
     with open(stats_path, 'w') as f:
         f.write(stats_str.to_string()) # Convert Series to string before writing
     logging.info(f"Backtest stats saved to {stats_path}")
@@ -392,19 +423,21 @@ try:
 
 
 except Exception as e:
-    logging.error(f"Error during Pyfolio report generation: {e}", exc_info=True)
+    logging.error(f"Error during Pyfolio report generation or saving stats: {e}", exc_info=True)
 
-# --- Generate and Save Matplotlib Plot ---
-plot_save_path = os.path.join(BACKTEST_RESULTS_DIR, f"{MODEL_FILENAME_BASE}_account_value_plot.png")
+# --- Generate and Save Matplotlib Plots (using potentially suffixed names) ---
+plot_filename = f"{MODEL_FILENAME_BASE}_account_value_plot.png" # Base already includes suffix
+plot_save_path = os.path.join(BACKTEST_RESULTS_DIR, plot_filename)
 plot_account_value(account_value_df, plot_save_path) # Call the account value plot function
 
-# --- Generate and Save Stock Prices Plot ---
-prices_plot_save_path = os.path.join(BACKTEST_RESULTS_DIR, f"{MODEL_FILENAME_BASE}_stock_prices_plot.png")
+prices_plot_filename = f"{MODEL_FILENAME_BASE}_stock_prices_plot.png" # Base already includes suffix
+prices_plot_save_path = os.path.join(BACKTEST_RESULTS_DIR, prices_plot_filename)
 # We need the original test_df and the list of tickers
 plot_stock_prices(test_df, tickers, prices_plot_save_path) # Call the new stock prices plot function
 
-# --- Save Results ---
-results_df_path = os.path.join(BACKTEST_RESULTS_DIR, f"{MODEL_FILENAME_BASE}_account_values.csv")
+# --- Save Results (using potentially suffixed name) ---
+results_filename = f"{MODEL_FILENAME_BASE}_account_values.csv" # Base already includes suffix
+results_df_path = os.path.join(BACKTEST_RESULTS_DIR, results_filename)
 account_value_df.to_csv(results_df_path)
 logging.info(f"Account values saved to {results_df_path}")
 

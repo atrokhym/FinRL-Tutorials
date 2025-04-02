@@ -15,19 +15,25 @@ PREPROCESS_SCRIPT = os.path.join(SRC_DIR, 'preprocessing', 'preprocess_data.py')
 TRAIN_SCRIPT = os.path.join(SRC_DIR, 'training', 'train_agent.py')
 TUNE_SCRIPT = os.path.join(SRC_DIR, 'training', 'tune_agent.py') # Added tuning script path
 BACKTEST_SCRIPT = os.path.join(SRC_DIR, 'backtesting', 'backtest_agent.py')
+WALKFORWARD_SCRIPT = os.path.join(SRC_DIR, 'backtesting', 'walkforward_backtest.py') # Added walkforward script path
 PAPERTRADE_SCRIPT = os.path.join(SRC_DIR, 'trading', 'alpaca_papertrader.py')
 
 # Ensure src directory is in path if needed (though scripts should handle their own imports)
 # sys.path.insert(0, SRC_DIR)
 
 # --- Helper Function to Run Scripts ---
-def run_script(script_path, log_level_str="INFO"):
-    """Runs a Python script using subprocess, passing the log level."""
+def run_script(script_path, log_level_str="INFO", extra_args=None):
+    """
+    Runs a Python script using subprocess, passing the log level and optional extra args.
+    """
     logging.info(f"Executing script: {script_path} with log level {log_level_str}")
     try:
         # Use sys.executable to ensure the correct Python interpreter is used
         command = [sys.executable, script_path, '--log-level', log_level_str]
+        if extra_args:
+            command.extend(extra_args) # Add extra arguments if provided
         logging.debug(f"Running command: {' '.join(command)}")
+        # Note: Subprocess environment is inherited by default
         result = subprocess.run(command, check=True, capture_output=True, text=True)
         # Log stdout/stderr at debug level to avoid cluttering INFO logs unless needed
         logging.debug(f"Script Output:\n{result.stdout}")
@@ -66,40 +72,49 @@ def setup_logging(level_str="INFO"):
 
 def main():
     parser = argparse.ArgumentParser(description="Alpaca Trading Agent Orchestrator")
+    # Main mode argument
     parser.add_argument(
         'mode',
-        choices=['fetch', 'preprocess', 'tune', 'train', 'backtest', 'papertrade', 'all'], # Added 'tune' mode
-        help=(
-            "Mode to run: "
-            "'fetch' - Fetch raw data. "
-            "'preprocess' - Preprocess raw data. "
-            "'train' - Train the RL agent. "
-            "'tune' - Run hyperparameter tuning for the agent. " # Added help text for tune
-            "'backtest' - Backtest the trained agent. "
-            "'papertrade' - Start the paper trading agent (runs continuously). "
-            "'all' - Run fetch, preprocess, train, and backtest sequentially."
-        )
+        choices=['fetch', 'preprocess', 'tune', 'train', 'backtest', 'walkforward', 'papertrade', 'all'],
+        help="The primary operation mode."
     )
+    # General log level
     parser.add_argument(
         '--log-level',
         default='INFO',
         choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
         help="Set the logging level for the orchestrator and default for scripts."
     )
-    # Add other arguments if needed, e.g., specific config file, model name
+    # Mode-specific arguments (example for walkforward)
+    parser.add_argument(
+        '--skip-tuning',
+        action='store_true',
+        help="[Walkforward Mode Only] Skip hyperparameter tuning for each window."
+    )
 
     args = parser.parse_args()
+
+    # --- Validate arguments ---
+    # Ensure --skip-tuning is only used with walkforward mode
+    if args.skip_tuning and args.mode != 'walkforward':
+        parser.error("--skip-tuning argument is only valid for the 'walkforward' mode.")
+
 
     # Configure logging based on the argument
     setup_logging(args.log_level)
 
     logging.info(f"--- Running in mode: {args.mode} ---")
+    if args.mode == 'walkforward' and args.skip_tuning:
+        logging.info("Walkforward: --skip-tuning flag is set.")
+
 
     # Determine the log level to pass to scripts
     script_log_level = args.log_level
     if args.mode == 'backtest' or (args.mode == 'all' and 'backtest' in sys.argv): # Check if backtest is part of 'all'
          script_log_level_backtest = 'DEBUG'
          logging.info("Setting log level for backtest script to DEBUG")
+    # Removed duplicated code block that was causing indentation/syntax errors
+
     else:
          script_log_level_backtest = script_log_level # Use default for non-backtest steps in 'all'
 
@@ -135,7 +150,16 @@ def main():
             logging.error("Agent backtesting failed.")
             # Don't necessarily exit if 'all' mode, just report failure
 
-    if args.mode == 'papertrade' or args.mode == 'all':
+    if args.mode == 'walkforward':
+        logging.info("--- Step: Running Walk-Forward Backtesting ---")
+        wf_extra_args = []
+        if args.skip_tuning:
+            wf_extra_args.append('--skip-tuning')
+        # Call walkforward script, passing the log level and the extra arg if present
+        if not run_script(WALKFORWARD_SCRIPT, script_log_level, extra_args=wf_extra_args):
+             logging.error("Walk-forward backtesting failed.")
+
+    if args.mode == 'papertrade': # Removed 'all' condition for papertrade
         logging.info("--- Step: Starting Paper Trading Agent ---")
         # Note: The papertrade script runs indefinitely due to the schedule loop
         if not run_script(PAPERTRADE_SCRIPT, script_log_level): # Use default log level

@@ -28,14 +28,16 @@ except ImportError as e:
 INDICATORS = [
     'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap',
     'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb'
+    # Turbulence is calculated separately
 ]
-if settings.NUM_STOCK_FEATURES != len(INDICATORS):
-    logging.warning(f"Mismatch between settings.NUM_STOCK_FEATURES ({settings.NUM_STOCK_FEATURES}) and actual indicators ({len(INDICATORS)}). Using {len(INDICATORS)}.")
-    effective_num_features = len(INDICATORS)
-    effective_state_space = 1 + settings.STOCK_DIM + settings.STOCK_DIM * effective_num_features
-else:
-    effective_num_features = settings.NUM_STOCK_FEATURES
-    effective_state_space = settings.STATE_SPACE
+# Use the STATE_SPACE defined in settings, which should be correctly calculated
+# using INDICATORS_WITH_TURBULENCE length
+effective_state_space = settings.STATE_SPACE
+# We still need the list of indicators *excluding* turbulence for state construction later
+tech_indicator_list_for_state = settings.INDICATORS_WITH_TURBULENCE
+
+logging.info(f"Using State Space size from settings: {effective_state_space}")
+logging.info(f"Indicator list for state construction: {tech_indicator_list_for_state}")
 
 # --- Custom Environment Definition (Replicating StockTradingEnv Logic) ---
 # We inherit from gym.Env directly now
@@ -71,11 +73,11 @@ class AlpacaStockTradingEnv(gym.Env):
         # --- End Costs and Slippage ---
 
         self.reward_scaling = kwargs.get('reward_scaling', 1e-4)
-        self.state_space_dim = effective_state_space # Use calculated state space
+        self.state_space_dim = effective_state_space # Use state space size from settings
         self.action_space_dim = settings.ACTION_SPACE
-        self.tech_indicator_list = INDICATORS # Use our defined list
-        self.turbulence_threshold = kwargs.get('turbulence_threshold', None)
-        self.risk_indicator_col = kwargs.get('risk_indicator_col', 'turbulence') # Not used if threshold is None
+        self.tech_indicator_list = tech_indicator_list_for_state # Use the list including turbulence
+        self.turbulence_threshold = kwargs.get('turbulence_threshold', settings.TURBULENCE_THRESHOLD if hasattr(settings, 'TURBULENCE_THRESHOLD') else None) # Load from settings
+        self.risk_indicator_col = kwargs.get('risk_indicator_col', 'turbulence') # Default column name
         self.print_verbosity = kwargs.get('print_verbosity', 10)
 
         # --- Space Setup ---
@@ -139,15 +141,18 @@ class AlpacaStockTradingEnv(gym.Env):
                 # Ensure self.data contains all tickers for the first valid day
                 if len(self.data['tic'].unique()) != self.stock_dim:
                      logging.error(f"Data for initial day {self.day} is incomplete. Tickers found: {self.data['tic'].unique()}. Expected: {self.stock_dim}")
-                     raise ValueError("Incomplete data for initial state calculation.")
+                     raise ValueError("Incomplete data for initial state calculation.") # Corrected indentation
 
+                # Use the list including turbulence for state construction
+                # Corrected: Use INDICATORS_WITH_TURBULENCE from settings
+                features = self.data[settings.INDICATORS_WITH_TURBULENCE].values.flatten().tolist()
                 state = (
                     [self.initial_amount] # Balance
                     + self.num_stock_shares # Shares held
-                    + self.data[self.tech_indicator_list].values.flatten().tolist() # Features for all stocks on day 0
+                    + features # Features for all stocks on day 0
                 )
                 # print(f"Day {self.day} Initial State: len={len(state)}")
-                # print(state)
+            # print(state)
 
             else:
                 raise ValueError("Dataframe should have at least two dates to scan history")
@@ -158,19 +163,23 @@ class AlpacaStockTradingEnv(gym.Env):
                  logging.error(f"Data for day {self.day} is incomplete. Tickers found: {self.data['tic'].unique()}. Expected: {self.stock_dim}")
                  raise ValueError(f"Incomplete data for state calculation on day {self.day}.")
 
+            # Use the list including turbulence for state construction
+            # Corrected: Use INDICATORS_WITH_TURBULENCE from settings
+            features = self.data[settings.INDICATORS_WITH_TURBULENCE].values.flatten().tolist()
             state = (
                 [self.state[0]] # Previous balance (list)
                 + self.state[1 : self.stock_dim + 1].tolist() # Previous shares held (convert slice to list)
-                + self.data[self.tech_indicator_list].values.flatten().tolist() # Features for all stocks on current day (list)
+                + features # Features for all stocks on current day (list)
             )
             # print(f"Day {self.day} Subsequent State: len={len(state)}")
             # print(state)
 
-        # Verify state dimension
-        expected_len = 1 + self.stock_dim + self.stock_dim * len(self.tech_indicator_list)
+        # Verify state dimension using the correct list length from settings
+        # Corrected: Use settings.INDICATORS_WITH_TURBULENCE directly
+        expected_len = 1 + self.stock_dim + self.stock_dim * len(settings.INDICATORS_WITH_TURBULENCE)
         if len(state) != expected_len:
              logging.error(f"State length mismatch! Expected {expected_len}, got {len(state)}")
-             logging.error(f"Balance: 1, Shares: {self.stock_dim}, Features: {self.stock_dim * len(self.tech_indicator_list)}")
+             logging.error(f"Balance: 1, Shares: {self.stock_dim}, Features: {self.stock_dim * len(settings.INDICATORS_WITH_TURBULENCE)}")
              raise RuntimeError("State dimension mismatch during calculation.")
 
         return np.array(state, dtype=np.float32)
@@ -208,11 +217,17 @@ class AlpacaStockTradingEnv(gym.Env):
 
         # Perform sell action based on the sign of the action
         if self.turbulence_threshold is not None:
-             # Simplified turbulence check (original uses self.turbulence, which might not be set)
-             current_turbulence = self.df.loc[self.day * self.stock_dim, 'turbulence'] if 'turbulence' in self.df.columns else 0
+             # Fetch turbulence for the specific stock on the current day
+             try:
+                 current_turbulence = self.data.loc[index, self.risk_indicator_col]
+             except KeyError:
+                 logging.warning(f"Turbulence column '{self.risk_indicator_col}' not found for index {index} on day {self.day}. Defaulting to 0.")
+                 current_turbulence = 0
+
              if current_turbulence >= self.turbulence_threshold:
                  # Sell all shares if turbulence is high
                  if self.state[index + 1] > 0:
+                     logging.debug(f"Turbulence high ({current_turbulence:.2f} >= {self.turbulence_threshold}). Forcing sell of {self.state[index + 1]} shares for index {index}.")
                      # Apply slippage to sell price
                      sell_price_after_slippage = self.data.loc[index, "close"] * (1 - self.slippage_pct)
                      shares_to_sell = self.state[index + 1] # Store before zeroing
@@ -302,12 +317,18 @@ class AlpacaStockTradingEnv(gym.Env):
         if self.turbulence_threshold is None:
             buy_num_shares = _do_buy()
         else:
-            # Simplified turbulence check
-            current_turbulence = self.df.loc[self.day * self.stock_dim, 'turbulence'] if 'turbulence' in self.df.columns else 0
+            # Fetch turbulence for the specific stock on the current day
+            try:
+                 current_turbulence = self.data.loc[index, self.risk_indicator_col]
+            except KeyError:
+                 logging.warning(f"Turbulence column '{self.risk_indicator_col}' not found for index {index} on day {self.day}. Defaulting to 0.")
+                 current_turbulence = 0
+
             if current_turbulence < self.turbulence_threshold:
                 buy_num_shares = _do_buy()
             else:
-                buy_num_shares = 0 # Don't buy if turbulence is high
+                 logging.debug(f"Turbulence high ({current_turbulence:.2f} >= {self.turbulence_threshold}). Preventing buy for index {index}.")
+                 buy_num_shares = 0 # Don't buy if turbulence is high
         return buy_num_shares
 
     def step(self, actions):

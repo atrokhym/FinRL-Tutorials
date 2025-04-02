@@ -191,17 +191,20 @@ def run_trading_logic(api, model):
     current_shares = [holdings.get(tic, 0) for tic in settings.TICKERS]
     # Ensure features are ordered correctly by ticker as in settings.TICKERS
     latest_state_df = latest_state_df.set_index('tic').loc[settings.TICKERS].reset_index()
-    feature_values = latest_state_df[settings.INDICATORS].values.flatten().tolist()
+    # --- Corrected: Use INDICATORS_WITH_TURBULENCE for state construction ---
+    feature_values = latest_state_df[settings.INDICATORS_WITH_TURBULENCE].values.flatten().tolist()
 
     state = np.array(
         [cash_balance] + current_shares + feature_values,
         dtype=np.float32
     )
 
-    # Verify state dimension
-    expected_len = 1 + settings.STOCK_DIM + settings.STOCK_DIM * len(settings.INDICATORS)
+    # Verify state dimension using the correct length
+    expected_len = settings.STATE_SPACE # Use the STATE_SPACE calculated in settings.py
+    # expected_len = 1 + settings.STOCK_DIM + settings.STOCK_DIM * len(settings.INDICATORS_WITH_TURBULENCE) # Alternative calculation
     if len(state) != expected_len:
         logging.error(f"Constructed state length mismatch! Expected {expected_len}, got {len(state)}")
+        logging.error(f"Features used: {settings.INDICATORS_WITH_TURBULENCE}")
         return
 
     logging.info(f"State constructed for prediction. Shape: {state.shape}")

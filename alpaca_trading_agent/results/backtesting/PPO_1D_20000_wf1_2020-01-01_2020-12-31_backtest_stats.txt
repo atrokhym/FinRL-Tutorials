@@ -1,0 +1,13 @@
+Annual return          1.938901
+Cumulative returns     1.964153
+Annual volatility      0.597177
+Sharpe ratio           2.117101
+Calmar ratio           3.901967
+Stability              0.860285
+Max drawdown          -0.496903
+Omega ratio            1.479830
+Sortino ratio          3.126133
+Skew                        NaN
+Kurtosis                    NaN
+Tail ratio             1.148710
+Daily value at risk   -0.070220

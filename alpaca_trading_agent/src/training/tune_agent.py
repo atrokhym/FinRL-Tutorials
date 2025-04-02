@@ -71,28 +71,63 @@ VALIDATION_SPLIT_RATIO = 0.8 # Use 80% for training, 20% for validation within t
 os.makedirs(RESULTS_DIR, exist_ok=True)
 os.makedirs(os.path.join(RESULTS_DIR, 'tuning'), exist_ok=True) # For tuning results/logs
 
-# --- Load and Split Data ---
-processed_train_filename = f"train_processed_{settings.TRAIN_START_DATE}_{settings.TRAIN_END_DATE}.csv"
-processed_train_filepath = os.path.join(DATA_DIR, processed_train_filename)
+# --- Load and Filter Data for Current Window ---
+# Load the combined processed file
+full_processed_filename = "full_processed_combined.csv"
+full_processed_filepath = os.path.join(DATA_DIR, full_processed_filename)
+
+# Check for Walk-Forward override environment variables
+train_start_override = os.environ.get('WF_OVERRIDE_TRAIN_START')
+train_end_override = os.environ.get('WF_OVERRIDE_TRAIN_END')
 
 try:
-    full_train_df = pd.read_csv(processed_train_filepath)
-    full_train_df['date'] = pd.to_datetime(full_train_df['date'])
-    full_train_df = full_train_df.sort_values(by=['date', 'tic']).reset_index(drop=True)
-    logging.info(f"Loaded full training data: {processed_train_filepath}")
+    full_df = pd.read_csv(full_processed_filepath)
+    full_df['date'] = pd.to_datetime(full_df['date'])
+    full_df = full_df.sort_values(by=['date', 'tic']).reset_index(drop=True)
+    logging.info(f"Loaded full processed data: {full_processed_filepath}")
 
-    # Split data into training and validation sets for tuning evaluation
-    unique_dates = full_train_df['date'].unique()
+    # Filter data if override dates are provided (for Walk-Forward)
+    if train_start_override and train_end_override:
+        logging.info(f"Applying Walk-Forward date overrides: Train Start={train_start_override}, Train End={train_end_override}")
+        train_start_dt = pd.to_datetime(train_start_override)
+        train_end_dt = pd.to_datetime(train_end_override)
+        # Filter the DataFrame for the specific training window
+        current_window_df = full_df[(full_df['date'] >= train_start_dt) & (full_df['date'] <= train_end_dt)].reset_index(drop=True)
+        logging.info(f"Filtered data for current window. Shape: {current_window_df.shape}, Date range: {current_window_df['date'].min()} to {current_window_df['date'].max()}")
+    else:
+        # Default behavior: Use TRAIN_START_DATE and TRAIN_END_DATE from settings
+        logging.info("No Walk-Forward overrides found. Using default TRAIN dates from settings.")
+        train_start_dt = pd.to_datetime(settings.TRAIN_START_DATE)
+        train_end_dt = pd.to_datetime(settings.TRAIN_END_DATE)
+        current_window_df = full_df[(full_df['date'] >= train_start_dt) & (full_df['date'] <= train_end_dt)].reset_index(drop=True)
+        logging.info(f"Filtered data using settings dates. Shape: {current_window_df.shape}, Date range: {current_window_df['date'].min()} to {current_window_df['date'].max()}")
+
+
+    # Split the *current window's data* into training and validation sets for tuning evaluation
+    unique_dates = current_window_df['date'].unique()
+    if len(unique_dates) < 2: # Need at least 2 unique dates to split
+         logging.error("Not enough unique dates in the current data window to perform train/validation split for tuning.")
+         sys.exit(1)
+
     split_index = int(len(unique_dates) * VALIDATION_SPLIT_RATIO)
+    # Ensure split_index is at least 1 to have some validation data
+    split_index = max(1, split_index)
+    # Ensure split index is not beyond the last date
+    split_index = min(split_index, len(unique_dates) - 1)
+
     split_date = unique_dates[split_index]
 
-    train_split_df = full_train_df[full_train_df['date'] < split_date].reset_index(drop=True)
-    validation_df = full_train_df[full_train_df['date'] >= split_date].reset_index(drop=True)
+    train_split_df = current_window_df[current_window_df['date'] < split_date].reset_index(drop=True)
+    validation_df = current_window_df[current_window_df['date'] >= split_date].reset_index(drop=True)
 
-    logging.info(f"Data split for tuning: Train ({len(train_split_df['date'].unique())} days), Validation ({len(validation_df['date'].unique())} days)")
+    if train_split_df.empty or validation_df.empty:
+        logging.error("Train or validation split resulted in empty DataFrame. Check date range and split ratio.")
+        sys.exit(1)
+
+    logging.info(f"Data split for tuning within window: Train ({len(train_split_df['date'].unique())} days), Validation ({len(validation_df['date'].unique())} days)")
 
 except FileNotFoundError:
-    logging.error(f"Processed training data file not found: {processed_train_filepath}")
+    logging.error(f"Full processed data file not found: {full_processed_filepath}")
     sys.exit(1)
 except Exception as e:
     logging.error(f"Error loading or splitting data: {e}")
@@ -220,8 +255,14 @@ def objective(trial: optuna.Trial) -> float:
 
 # --- Run Optuna Study ---
 if __name__ == "__main__":
-    study_name = f"ppo-tuning-{settings.TIME_INTERVAL}-{int(time.time())}"
-    storage_path = f"sqlite:///{RESULTS_DIR}/tuning/{study_name}.db" # Store results in a DB
+    # Check for Walk-Forward model suffix
+    model_suffix = os.environ.get('WF_MODEL_SUFFIX', '')
+    if model_suffix:
+        logging.info(f"Using Walk-Forward model suffix: {model_suffix}")
+
+    study_name = f"ppo-tuning-{settings.TIME_INTERVAL}-{int(time.time())}{model_suffix}"
+    db_filename = f"{study_name}.db"
+    storage_path = f"sqlite:///{os.path.join(RESULTS_DIR, 'tuning', db_filename)}" # Store results in a DB
 
     logging.info(f"Starting Optuna study: {study_name}")
     logging.info(f"Number of trials: {N_TRIALS}")
@@ -254,11 +295,14 @@ if __name__ == "__main__":
         for key, value in best_trial.params.items():
             logging.info(f"  {key}: {value}")
 
-        # Save best params to JSON file in config directory
-        best_params_path = os.path.join(CONFIG_DIR, "best_ppo_params.json") # Save in config dir
+        # Save best params to JSON file in config directory, adding suffix if present
+        best_params_filename = f"best_ppo_params{model_suffix}.json"
+        best_params_path = os.path.join(CONFIG_DIR, best_params_filename)
         best_params_dict = best_trial.params
         # Add study info if desired
         best_params_dict['_study_name'] = study_name
+        best_params_dict['_window_train_start'] = os.environ.get('WF_OVERRIDE_TRAIN_START') # Log WF dates if available
+        best_params_dict['_window_train_end'] = os.environ.get('WF_OVERRIDE_TRAIN_END')
         best_params_dict['_best_trial_number'] = best_trial.number
         # Handle potential -Infinity before saving to JSON
         best_value = best_trial.value

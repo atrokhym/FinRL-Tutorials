@@ -41,24 +41,49 @@ os.makedirs(os.path.join(RESULTS_DIR, 'models'), exist_ok=True) # For trained mo
 # These can be moved to settings.py or a separate training config file later
 MODEL_ALGO = "PPO" # Algorithm to use (e.g., PPO, A2C, DDPG)
 TOTAL_TIMESTEPS = 20000 # Reduce for faster testing, increase for better training (e.g., 100k, 500k)
-MODEL_FILENAME = f"{MODEL_ALGO}_{settings.TIME_INTERVAL}_{TOTAL_TIMESTEPS}"
-LOG_FILENAME = f"{MODEL_ALGO}_{settings.TIME_INTERVAL}_{TOTAL_TIMESTEPS}_log"
+# Check for Walk-Forward model suffix
+model_suffix = os.environ.get('WF_MODEL_SUFFIX', '')
+if model_suffix:
+    logging.info(f"Using Walk-Forward model suffix: {model_suffix}")
 
-# --- Load Processed Data ---
-processed_train_filename = f"train_processed_{settings.TRAIN_START_DATE}_{settings.TRAIN_END_DATE}.csv"
-processed_train_filepath = os.path.join(DATA_DIR, processed_train_filename)
+MODEL_FILENAME = f"{MODEL_ALGO}_{settings.TIME_INTERVAL}_{TOTAL_TIMESTEPS}{model_suffix}"
+LOG_FILENAME = f"{MODEL_ALGO}_{settings.TIME_INTERVAL}_{TOTAL_TIMESTEPS}{model_suffix}_log"
+
+# --- Load Processed Data (and filter for Walk-Forward) ---
+full_processed_filename = "full_processed_combined.csv"
+full_processed_filepath = os.path.join(DATA_DIR, full_processed_filename)
+
+# Check for Walk-Forward override environment variables
+train_start_override = os.environ.get('WF_OVERRIDE_TRAIN_START')
+train_end_override = os.environ.get('WF_OVERRIDE_TRAIN_END')
 
 try:
-    train_df = pd.read_csv(processed_train_filepath)
-    # Convert date column to datetime
-    train_df['date'] = pd.to_datetime(train_df['date'])
-    # Sort data
-    train_df = train_df.sort_values(by=['date', 'tic'])
-    # Reset index to default integer index, required by this env version
-    train_df = train_df.reset_index(drop=True)
-    logging.info(f"Loaded processed training data: {processed_train_filepath}")
+    full_df = pd.read_csv(full_processed_filepath)
+    full_df['date'] = pd.to_datetime(full_df['date'])
+    full_df = full_df.sort_values(by=['date', 'tic']).reset_index(drop=True)
+    logging.info(f"Loaded full processed data: {full_processed_filepath}")
+
+    # Filter data for the current training window
+    if train_start_override and train_end_override:
+        logging.info(f"Applying Walk-Forward date overrides: Train Start={train_start_override}, Train End={train_end_override}")
+        train_start_dt = pd.to_datetime(train_start_override)
+        train_end_dt = pd.to_datetime(train_end_override)
+        train_df = full_df[(full_df['date'] >= train_start_dt) & (full_df['date'] <= train_end_dt)].reset_index(drop=True)
+    else:
+        # Default behavior: Use TRAIN_START_DATE and TRAIN_END_DATE from settings
+        logging.info("No Walk-Forward overrides found. Using default TRAIN dates from settings.")
+        train_start_dt = pd.to_datetime(settings.TRAIN_START_DATE)
+        train_end_dt = pd.to_datetime(settings.TRAIN_END_DATE)
+        train_df = full_df[(full_df['date'] >= train_start_dt) & (full_df['date'] <= train_end_dt)].reset_index(drop=True)
+
+    if train_df.empty:
+         logging.error(f"Training data is empty after filtering for dates {train_start_dt} to {train_end_dt}. Check date ranges.")
+         sys.exit(1)
+
+    logging.info(f"Using training data for period: {train_df['date'].min()} to {train_df['date'].max()}. Shape: {train_df.shape}")
+
 except FileNotFoundError:
-    logging.error(f"Processed training data file not found: {processed_train_filepath}")
+    logging.error(f"Full processed data file not found: {full_processed_filepath}")
     logging.error("Please run the preprocessing script first.")
     sys.exit(1)
 except Exception as e:
@@ -79,12 +104,14 @@ except Exception as e:
 # --- Configure Agent ---
 logging.info(f"Configuring agent: {MODEL_ALGO}")
 
-# Set up Stable Baselines 3 logger
+# Set up Stable Baselines 3 logger (using potentially suffixed name)
 log_path = os.path.join(RESULTS_DIR, 'logs', LOG_FILENAME)
 sb3_logger = sb3_configure_logger(log_path, ["stdout", "csv", "tensorboard"])
+logging.info(f"SB3 log path set to: {log_path}")
 
-# --- Load Tuned Hyperparameters ---
-best_params_path = os.path.join(CONFIG_DIR, "best_ppo_params.json")
+# --- Load Tuned Hyperparameters (using potentially suffixed name) ---
+best_params_filename = f"best_ppo_params{model_suffix}.json"
+best_params_path = os.path.join(CONFIG_DIR, best_params_filename)
 tuned_params = {}
 try:
     with open(best_params_path, 'r') as f:
@@ -94,6 +121,8 @@ try:
     tuned_params.pop('_study_name', None)
     tuned_params.pop('_best_trial_number', None)
     tuned_params.pop('_best_value', None)
+    tuned_params.pop('_window_train_start', None) # Remove WF info if present
+    tuned_params.pop('_window_train_end', None)
 except FileNotFoundError:
     logging.warning(f"Best parameters file not found at {best_params_path}. Using default parameters.")
 except json.JSONDecodeError:
@@ -181,8 +210,9 @@ except Exception as e:
     logging.error(f"Error during model training: {e}", exc_info=True)
     sys.exit(1)
 
-# --- Save Trained Model ---
-model_save_path = os.path.join(RESULTS_DIR, 'models', f"{MODEL_FILENAME}.zip")
+# --- Save Trained Model (using potentially suffixed name) ---
+model_save_filename = f"{MODEL_FILENAME}.zip"
+model_save_path = os.path.join(RESULTS_DIR, 'models', model_save_filename)
 logging.info(f"Saving trained model to: {model_save_path}")
 try:
     model.save(model_save_path)
