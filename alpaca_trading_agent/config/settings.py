@@ -54,7 +54,8 @@ ACTION_SPACE = STOCK_DIM
 #     "eval_times": 1
 # }
 
-# Trading cost and position limits
-MAX_STOCK_POSITION = 100
-TRADE_COST_PCT = 0.001  # 0.1% trading cost
-TURBULENCE_THRESHOLD = 30
+# Trading cost, slippage, and position limits
+TRANSACTION_COST_PERCENT = 0.001  # 0.1% per trade
+SLIPPAGE_PERCENT = 0.0005      # 0.05% per trade (applied to execution price)
+MAX_STOCK_POSITION = 100        # Example: Maximum shares per stock
+TURBULENCE_THRESHOLD = 30       # Example: Threshold for market turbulence index

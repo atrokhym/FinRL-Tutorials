@@ -57,11 +57,19 @@ class AlpacaStockTradingEnv(gym.Env):
 
         # --- Core Parameters (from settings and kwargs) ---
         self.stock_dim = settings.STOCK_DIM
-        self.hmax = kwargs.get('hmax', 100)
+        self.hmax = kwargs.get('hmax', 100) # Max shares to trade per step
         self.initial_amount = kwargs.get('initial_amount', settings.INITIAL_ACCOUNT_BALANCE)
-        self.num_stock_shares = kwargs.get('num_stock_shares', [0] * self.stock_dim)
-        self.buy_cost_pct = kwargs.get('buy_cost_pct', [0.001] * self.stock_dim)
-        self.sell_cost_pct = kwargs.get('sell_cost_pct', [0.001] * self.stock_dim)
+        self.num_stock_shares = kwargs.get('num_stock_shares', [0] * self.stock_dim) # Initial holdings
+
+        # --- Load Costs and Slippage from Settings ---
+        self.transaction_cost_pct = kwargs.get('transaction_cost_pct', settings.TRANSACTION_COST_PERCENT)
+        self.slippage_pct = kwargs.get('slippage_pct', settings.SLIPPAGE_PERCENT)
+        logging.info(f"Env using Transaction Cost: {self.transaction_cost_pct*100:.3f}%, Slippage: {self.slippage_pct*100:.3f}%")
+        # Remove old separate buy/sell cost lists if they exist
+        # self.buy_cost_pct = kwargs.get('buy_cost_pct', [self.transaction_cost_pct] * self.stock_dim)
+        # self.sell_cost_pct = kwargs.get('sell_cost_pct', [self.transaction_cost_pct] * self.stock_dim)
+        # --- End Costs and Slippage ---
+
         self.reward_scaling = kwargs.get('reward_scaling', 1e-4)
         self.state_space_dim = effective_state_space # Use calculated state space
         self.action_space_dim = settings.ACTION_SPACE
@@ -172,24 +180,27 @@ class AlpacaStockTradingEnv(gym.Env):
         """Replicated from StockTradingEnv"""
         def _do_sell_normal():
             if self.state[index + 1] > 0: # Check if shares > 0
+                # Apply slippage to sell price (get slightly less)
+                sell_price_after_slippage = self.data.loc[index, "close"] * (1 - self.slippage_pct)
+
                 # Sell a proportion
-                sell_num_shares = min(
-                    abs(action), self.state[index + 1]
-                )
-                sell_amount = (
-                    self.data.loc[index, "close"]
-                    * sell_num_shares
-                    * (1 - self.sell_cost_pct[index])
-                )
+                sell_num_shares = min(abs(action), self.state[index + 1])
+
+                # Calculate amount before transaction cost
+                gross_sell_amount = sell_price_after_slippage * sell_num_shares
+
+                # Calculate transaction cost
+                transaction_cost = gross_sell_amount * self.transaction_cost_pct
+
+                # Calculate final amount received
+                net_sell_amount = gross_sell_amount - transaction_cost
+
                 # Update balance
-                self.state[0] += sell_amount
+                self.state[0] += net_sell_amount
                 # Update shares
                 self.state[index + 1] -= sell_num_shares
-                self.cost += (
-                    self.data.loc[index, "close"]
-                    * sell_num_shares
-                    * self.sell_cost_pct[index]
-                )
+                # Update total cost tracker
+                self.cost += transaction_cost
                 self.trades += 1
             else:
                 sell_num_shares = 0
@@ -202,22 +213,28 @@ class AlpacaStockTradingEnv(gym.Env):
              if current_turbulence >= self.turbulence_threshold:
                  # Sell all shares if turbulence is high
                  if self.state[index + 1] > 0:
-                     # Update balance
-                     self.state[0] += (
-                         self.data.loc[index, "close"]
-                         * self.state[index + 1] # Corrected index
-                         * (1 - self.sell_cost_pct[index])
-                     )
-                     # Update shares
-                     self.cost += (
-                         self.data.loc[index, "close"]
-                         * self.state[index + 1] # Corrected index
-                         * self.sell_cost_pct[index]
-                     )
+                     # Apply slippage to sell price
+                     sell_price_after_slippage = self.data.loc[index, "close"] * (1 - self.slippage_pct)
                      shares_to_sell = self.state[index + 1] # Store before zeroing
-                     self.state[index + 1] = 0 # Corrected index
+
+                     # Calculate amount before transaction cost
+                     gross_sell_amount = sell_price_after_slippage * shares_to_sell
+
+                     # Calculate transaction cost
+                     transaction_cost = gross_sell_amount * self.transaction_cost_pct
+
+                     # Calculate final amount received
+                     net_sell_amount = gross_sell_amount - transaction_cost
+
+                     # Update balance
+                     self.state[0] += net_sell_amount
+                     # Update shares
+                     self.state[index + 1] = 0 # Zero out shares
+                     # Update total cost tracker
+                     self.cost += transaction_cost
                      self.trades += 1
                  else:
+                     shares_to_sell = 0 # No shares were held to sell
                      sell_num_shares = 0 # Should this be shares_to_sell = 0? No, sell_num_shares is fine here.
                  return shares_to_sell # Return the stored number of shares sold
              else:
@@ -230,24 +247,55 @@ class AlpacaStockTradingEnv(gym.Env):
              return sell_num_shares
 
     def _buy_stock(self, index, action):
-        """Replicated from StockTradingEnv"""
+        """Replicated from StockTradingEnv, modified for costs/slippage"""
         def _do_buy():
-            available_amount = self.state[0] // self.data.loc[index, "close"]
-            # Calculate shares to buy
-            buy_num_shares = min(available_amount, action)
-            buy_amount = (
-                self.data.loc[index, "close"]
-                * buy_num_shares
-                * (1 + self.buy_cost_pct[index])
-            )
-            # Update balance
-            self.state[0] -= buy_amount
-            # Update shares
-            self.state[index + 1] += buy_num_shares # Corrected index
-            self.cost += (
-                self.data.loc[index, "close"] * buy_num_shares * self.buy_cost_pct[index]
-            )
-            self.trades += 1
+            # Apply slippage to buy price (pay slightly more)
+            buy_price_after_slippage = self.data.loc[index, "close"] * (1 + self.slippage_pct)
+
+            # Calculate available shares we *could* buy based on price *after* slippage but *before* cost
+            # (Cost is deducted separately later)
+            if buy_price_after_slippage <= 0: # Avoid division by zero
+                return 0
+            available_shares = self.state[0] // buy_price_after_slippage
+
+            # Determine actual shares to buy (limited by action and available funds)
+            buy_num_shares = min(available_shares, action)
+
+            # Calculate cost of shares before transaction cost
+            gross_buy_amount = buy_price_after_slippage * buy_num_shares
+
+            # Calculate transaction cost
+            transaction_cost = gross_buy_amount * self.transaction_cost_pct
+
+            # Calculate total amount deducted from balance
+            total_buy_deduction = gross_buy_amount + transaction_cost
+
+            # Check if we actually have enough cash for the purchase + cost
+            if self.state[0] < total_buy_deduction:
+                 # Not enough cash, recalculate shares based on total cost
+                 # Max affordable cost = Balance / (price * (1+slip) * (1+cost))
+                 # Simplified: Reduce shares slightly if needed, though the initial check should be mostly sufficient
+                 # For simplicity here, if the exact calculation fails, we might buy slightly fewer shares or none.
+                 # Let's try buying one less share if the check fails, as a simple heuristic
+                 buy_num_shares = max(0, buy_num_shares -1) # Reduce shares by 1 if initial check failed
+                 gross_buy_amount = buy_price_after_slippage * buy_num_shares
+                 transaction_cost = gross_buy_amount * self.transaction_cost_pct
+                 total_buy_deduction = gross_buy_amount + transaction_cost
+                 # If still not enough, we buy zero
+                 if self.state[0] < total_buy_deduction:
+                     buy_num_shares = 0
+                     total_buy_deduction = 0
+                     transaction_cost = 0
+
+            # Update balance only if shares > 0
+            if buy_num_shares > 0:
+                self.state[0] -= total_buy_deduction
+                # Update shares
+                self.state[index + 1] += buy_num_shares # Corrected index
+                # Update total cost tracker
+                self.cost += transaction_cost
+                self.trades += 1
+
             return buy_num_shares
 
         # Perform buy action
