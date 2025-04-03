@@ -58,13 +58,13 @@ def connect_alpaca():
     try:
         api = tradeapi.REST(
             key_id=settings.ALPACA_API_KEY,
-            secret_key=settings.ALPACA_SECRET_KEY,
-            base_url=settings.ALPACA_BASE_URL, # Ensure this points to paper trading URL
+            secret_key=settings.ALPACA_API_SECRET,
+            base_url=settings.ALPACA_API_BASE_URL, # Ensure this points to paper trading URL
             api_version='v2'
         )
         account = api.get_account()
         logging.info(f"Connected successfully. Account Status: {account.status}")
-        if settings.ALPACA_BASE_URL != 'https://paper-api.alpaca.markets':
+        if settings.ALPACA_API_BASE_URL != 'https://paper-api.alpaca.markets':
              logging.warning("Connected to LIVE Alpaca API. Ensure this is intended.")
         return api
     except Exception as e:
@@ -294,9 +294,9 @@ if __name__ == "__main__":
     logging.info("--- Starting Alpaca Paper Trading Agent ---")
 
     # Check for API keys
-    if not settings.ALPACA_API_KEY or not settings.ALPACA_SECRET_KEY:
+    if not settings.ALPACA_API_KEY or not settings.ALPACA_API_SECRET:
         logging.error("Alpaca API Key/Secret not found in environment variables.")
-        logging.error("Please set ALPACA_API_KEY and ALPACA_SECRET_KEY.")
+        logging.error("Please set ALPACA_API_KEY and ALPACA_API_SECRET.")
         sys.exit(1)
 
     # Connect to Alpaca

@@ -7,8 +7,8 @@ load_dotenv()
 
 # Alpaca API Configuration
 ALPACA_API_KEY = os.getenv('ALPACA_API_KEY', '')
-ALPACA_SECRET_KEY = os.getenv('ALPACA_SECRET_KEY', '')
-ALPACA_BASE_URL = os.getenv('ALPACA_BASE_URL', 'https://paper-api.alpaca.markets')  # Use paper trading by default
+ALPACA_API_SECRET = os.getenv('ALPACA_API_SECRET', '')
+ALPACA_API_BASE_URL = os.getenv('ALPACA_API_BASE_URL', 'https://paper-api.alpaca.markets')  # Use paper trading by default
 DATA_SOURCE = 'alpaca'
 
 # Trading Parameters

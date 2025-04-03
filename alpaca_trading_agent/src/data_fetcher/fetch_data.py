@@ -34,8 +34,8 @@ os.makedirs(DATA_DIR, exist_ok=True)
 try:
     api = tradeapi.REST(
         key_id=api_keys.ALPACA_API_KEY,
-        secret_key=api_keys.ALPACA_SECRET_KEY,
-        base_url=api_keys.ALPACA_BASE_URL,
+        secret_key=api_keys.ALPACA_API_SECRET,
+        base_url=api_keys.ALPACA_API_BASE_URL,
         api_version='v2'
     )
     account = api.get_account()

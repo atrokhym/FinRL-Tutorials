@@ -116,3 +116,113 @@
 2025-04-01 15:45:57,304 - INFO - Submitting order: {'symbol': 'CSCO', 'qty': 21, 'side': 'buy', 'type': 'market', 'time_in_force': 'day'}
 2025-04-01 15:45:57,346 - INFO - Order submitted for CSCO. Order ID: 8f30c86f-39cb-418b-8a2a-e6c9029396e7, Status: pending_new
 2025-04-01 15:45:57,446 - INFO - --- Trading Logic Cycle Finished ---
+2025-04-02 13:16:02,615 - INFO - --- Starting Alpaca Paper Trading Agent ---
+2025-04-02 13:16:02,616 - INFO - Connecting to Alpaca API...
+2025-04-02 13:16:02,841 - INFO - Connected successfully. Account Status: ACTIVE
+2025-04-02 13:16:02,841 - INFO - Loading trained model from: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/results/models/PPO_1D_20000.zip
+2025-04-02 13:16:04,045 - INFO - Model loaded successfully.
+2025-04-02 13:16:04,046 - INFO - Scheduling trading logic to run daily at 15:45 EST/EDT.
+2025-04-02 13:16:04,062 - INFO - Scheduler started. Waiting for scheduled jobs...
+2025-04-02 15:45:04,132 - INFO - --- Running Trading Logic Cycle ---
+2025-04-02 15:45:04,151 - INFO - Fetching latest data for 10 tickers, lookback 60 days.
+2025-04-02 15:45:04,590 - INFO - Fetched 420 bars.
+2025-04-02 15:45:04,617 - INFO - Starting preprocessing. Initial shape: (42, 10)
+2025-04-02 15:45:04,620 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-04-02 15:45:04,668 - INFO - Calculated turbulence index (rolling 30-day std dev).
+2025-04-02 15:45:04,669 - INFO - Preprocessing for training/backtesting: Using full timeseries.
+2025-04-02 15:45:04,670 - INFO - Preprocessing finished. Final shape: (42, 17)
+2025-04-02 15:45:04,670 - INFO - Columns: ['index', 'date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb', 'turbulence']
+2025-04-02 15:45:04,671 - INFO - Date range: 2025-02-03 05:00:00+00:00 to 2025-04-02 04:00:00+00:00
+2025-04-02 15:45:04,672 - INFO - Starting preprocessing. Initial shape: (42, 10)
+2025-04-02 15:45:04,672 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-04-02 15:45:04,688 - INFO - Calculated turbulence index (rolling 30-day std dev).
+2025-04-02 15:45:04,689 - INFO - Preprocessing for training/backtesting: Using full timeseries.
+2025-04-02 15:45:04,690 - INFO - Preprocessing finished. Final shape: (42, 17)
+2025-04-02 15:45:04,690 - INFO - Columns: ['index', 'date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb', 'turbulence']
+2025-04-02 15:45:04,690 - INFO - Date range: 2025-02-03 05:00:00+00:00 to 2025-04-02 04:00:00+00:00
+2025-04-02 15:45:04,691 - INFO - Starting preprocessing. Initial shape: (42, 10)
+2025-04-02 15:45:04,692 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-04-02 15:45:04,708 - INFO - Calculated turbulence index (rolling 30-day std dev).
+2025-04-02 15:45:04,709 - INFO - Preprocessing for training/backtesting: Using full timeseries.
+2025-04-02 15:45:04,710 - INFO - Preprocessing finished. Final shape: (42, 17)
+2025-04-02 15:45:04,710 - INFO - Columns: ['index', 'date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb', 'turbulence']
+2025-04-02 15:45:04,710 - INFO - Date range: 2025-02-03 05:00:00+00:00 to 2025-04-02 04:00:00+00:00
+2025-04-02 15:45:04,711 - INFO - Starting preprocessing. Initial shape: (42, 10)
+2025-04-02 15:45:04,712 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-04-02 15:45:04,727 - INFO - Calculated turbulence index (rolling 30-day std dev).
+2025-04-02 15:45:04,728 - INFO - Preprocessing for training/backtesting: Using full timeseries.
+2025-04-02 15:45:04,729 - INFO - Preprocessing finished. Final shape: (42, 17)
+2025-04-02 15:45:04,729 - INFO - Columns: ['index', 'date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb', 'turbulence']
+2025-04-02 15:45:04,729 - INFO - Date range: 2025-02-03 05:00:00+00:00 to 2025-04-02 04:00:00+00:00
+2025-04-02 15:45:04,730 - INFO - Starting preprocessing. Initial shape: (42, 10)
+2025-04-02 15:45:04,731 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-04-02 15:45:04,816 - INFO - Calculated turbulence index (rolling 30-day std dev).
+2025-04-02 15:45:04,816 - INFO - Preprocessing for training/backtesting: Using full timeseries.
+2025-04-02 15:45:04,817 - INFO - Preprocessing finished. Final shape: (42, 17)
+2025-04-02 15:45:04,817 - INFO - Columns: ['index', 'date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb', 'turbulence']
+2025-04-02 15:45:04,817 - INFO - Date range: 2025-02-03 05:00:00+00:00 to 2025-04-02 04:00:00+00:00
+2025-04-02 15:45:04,818 - INFO - Starting preprocessing. Initial shape: (42, 10)
+2025-04-02 15:45:04,818 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-04-02 15:45:04,834 - INFO - Calculated turbulence index (rolling 30-day std dev).
+2025-04-02 15:45:04,834 - INFO - Preprocessing for training/backtesting: Using full timeseries.
+2025-04-02 15:45:04,835 - INFO - Preprocessing finished. Final shape: (42, 17)
+2025-04-02 15:45:04,835 - INFO - Columns: ['index', 'date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb', 'turbulence']
+2025-04-02 15:45:04,836 - INFO - Date range: 2025-02-03 05:00:00+00:00 to 2025-04-02 04:00:00+00:00
+2025-04-02 15:45:04,836 - INFO - Starting preprocessing. Initial shape: (42, 10)
+2025-04-02 15:45:04,837 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-04-02 15:45:05,538 - INFO - Calculated turbulence index (rolling 30-day std dev).
+2025-04-02 15:45:05,538 - INFO - Preprocessing for training/backtesting: Using full timeseries.
+2025-04-02 15:45:05,539 - INFO - Preprocessing finished. Final shape: (42, 17)
+2025-04-02 15:45:05,539 - INFO - Columns: ['index', 'date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb', 'turbulence']
+2025-04-02 15:45:05,539 - INFO - Date range: 2025-02-03 05:00:00+00:00 to 2025-04-02 04:00:00+00:00
+2025-04-02 15:45:05,540 - INFO - Starting preprocessing. Initial shape: (42, 10)
+2025-04-02 15:45:05,540 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-04-02 15:45:05,556 - INFO - Calculated turbulence index (rolling 30-day std dev).
+2025-04-02 15:45:05,557 - INFO - Preprocessing for training/backtesting: Using full timeseries.
+2025-04-02 15:45:05,558 - INFO - Preprocessing finished. Final shape: (42, 17)
+2025-04-02 15:45:05,558 - INFO - Columns: ['index', 'date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb', 'turbulence']
+2025-04-02 15:45:05,558 - INFO - Date range: 2025-02-03 05:00:00+00:00 to 2025-04-02 04:00:00+00:00
+2025-04-02 15:45:05,559 - INFO - Starting preprocessing. Initial shape: (42, 10)
+2025-04-02 15:45:05,560 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-04-02 15:45:05,576 - INFO - Calculated turbulence index (rolling 30-day std dev).
+2025-04-02 15:45:05,577 - INFO - Preprocessing for training/backtesting: Using full timeseries.
+2025-04-02 15:45:05,578 - INFO - Preprocessing finished. Final shape: (42, 17)
+2025-04-02 15:45:05,578 - INFO - Columns: ['index', 'date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb', 'turbulence']
+2025-04-02 15:45:05,578 - INFO - Date range: 2025-02-03 05:00:00+00:00 to 2025-04-02 04:00:00+00:00
+2025-04-02 15:45:05,579 - INFO - Starting preprocessing. Initial shape: (42, 10)
+2025-04-02 15:45:05,579 - INFO - Calculating indicators: ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb']
+2025-04-02 15:45:05,597 - INFO - Calculated turbulence index (rolling 30-day std dev).
+2025-04-02 15:45:05,598 - INFO - Preprocessing for training/backtesting: Using full timeseries.
+2025-04-02 15:45:05,599 - INFO - Preprocessing finished. Final shape: (42, 17)
+2025-04-02 15:45:05,599 - INFO - Columns: ['index', 'date', 'close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap', 'symbol', 'tic', 'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb', 'turbulence']
+2025-04-02 15:45:05,599 - INFO - Date range: 2025-02-03 05:00:00+00:00 to 2025-04-02 04:00:00+00:00
+2025-04-02 15:45:05,602 - INFO - Preprocessing complete. Processed data shape: (420, 17)
+2025-04-02 15:45:05,603 - INFO - Latest date in processed data: 2025-04-02 04:00:00+00:00
+2025-04-02 15:45:06,169 - INFO - Current Cash: 82672.71, Holdings: {'AAPL': 14, 'CSCO': 21, 'MSFT': 32}
+2025-04-02 15:45:06,172 - INFO - State constructed for prediction. Shape: (141,)
+2025-04-02 15:45:06,204 - INFO - Predicted Action: [-0.0926114   0.01284625 -0.09167226  0.15810482  0.04408734  0.08164988
+  0.03427497 -0.10407815  0.01398087 -0.11440238]
+2025-04-02 15:45:06,261 - INFO - Calculating desired trades based on action...
+2025-04-02 15:45:06,261 - INFO - ORDER PREP: Sell 9 shares of AAPL at market (Current Holding: 14, Est Price: 224.32).
+2025-04-02 15:45:06,261 - INFO - ORDER PREP: Buy 1 shares of MSFT at market (Current Holding: 32, Est Price: 383.61).
+2025-04-02 15:45:06,261 - INFO - ORDER PREP: Buy 15 shares of AMZN at market (Current Holding: 0, Est Price: 197.07).
+2025-04-02 15:45:06,261 - INFO - ORDER PREP: Buy 4 shares of META at market (Current Holding: 0, Est Price: 584.84).
+2025-04-02 15:45:06,261 - INFO - ORDER PREP: Buy 8 shares of NVDA at market (Current Holding: 0, Est Price: 110.09).
+2025-04-02 15:45:06,261 - INFO - ORDER PREP: Buy 3 shares of TSLA at market (Current Holding: 0, Est Price: 283.4).
+2025-04-02 15:45:06,261 - INFO - ORDER PREP: Buy 1 shares of CSCO at market (Current Holding: 21, Est Price: 61.73).
+2025-04-02 15:45:06,261 - INFO - Submitting 7 orders...
+2025-04-02 15:45:06,261 - INFO - Submitting order: {'symbol': 'AAPL', 'qty': 9, 'side': 'sell', 'type': 'market', 'time_in_force': 'day'}
+2025-04-02 15:45:06,319 - INFO - Order submitted for AAPL. Order ID: 51d02d84-be2a-4af6-ad0a-1c3e3499d791, Status: pending_new
+2025-04-02 15:45:06,419 - INFO - Submitting order: {'symbol': 'MSFT', 'qty': 1, 'side': 'buy', 'type': 'market', 'time_in_force': 'day'}
+2025-04-02 15:45:06,509 - INFO - Order submitted for MSFT. Order ID: 6a252eca-3907-4751-a58f-fc2a652cf2f8, Status: pending_new
+2025-04-02 15:45:06,609 - INFO - Submitting order: {'symbol': 'AMZN', 'qty': 15, 'side': 'buy', 'type': 'market', 'time_in_force': 'day'}
+2025-04-02 15:45:06,655 - INFO - Order submitted for AMZN. Order ID: 46df464f-219b-413a-ad29-30dccc68e621, Status: pending_new
+2025-04-02 15:45:06,755 - INFO - Submitting order: {'symbol': 'META', 'qty': 4, 'side': 'buy', 'type': 'market', 'time_in_force': 'day'}
+2025-04-02 15:45:06,798 - INFO - Order submitted for META. Order ID: b6a7507b-4ed0-4668-a79b-f5d4b82fc815, Status: pending_new
+2025-04-02 15:45:06,899 - INFO - Submitting order: {'symbol': 'NVDA', 'qty': 8, 'side': 'buy', 'type': 'market', 'time_in_force': 'day'}
+2025-04-02 15:45:06,962 - INFO - Order submitted for NVDA. Order ID: e85fecd7-e038-496f-991b-ecdc583b8337, Status: pending_new
+2025-04-02 15:45:07,063 - INFO - Submitting order: {'symbol': 'TSLA', 'qty': 3, 'side': 'buy', 'type': 'market', 'time_in_force': 'day'}
+2025-04-02 15:45:07,117 - INFO - Order submitted for TSLA. Order ID: 3fb4036b-e320-4b61-9702-36838ef1b8a8, Status: pending_new
+2025-04-02 15:45:07,217 - INFO - Submitting order: {'symbol': 'CSCO', 'qty': 1, 'side': 'buy', 'type': 'market', 'time_in_force': 'day'}
+2025-04-02 15:45:07,272 - INFO - Order submitted for CSCO. Order ID: d00af36d-da66-4d47-bc22-b3a143078af1, Status: pending_new
+2025-04-02 15:45:07,373 - INFO - --- Trading Logic Cycle Finished ---
