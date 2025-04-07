@@ -350,13 +350,22 @@ def process_data(data, technical_indicator_list, start_date, end_date, if_vix=Tr
             if not vix_df.empty:
                 try:
                     # Directly attempt to select and rename columns needed for merge
-                    vix_merge_df = vix_df[['timestamp', 'close']].copy() # Use .copy() to avoid SettingWithCopyWarning
-                    vix_merge_df.columns = ['timestamp', 'vix'] # Rename 'close' to 'vix' for merging
-                    # Merge VIX data
-                    processed_data = processed_data.merge(vix_merge_df, on="timestamp", how="left")
-                    # Fill missing VIX values
-                    processed_data['vix'] = processed_data['vix'].ffill().bfill()
-                    processed_data = processed_data.dropna(subset=['vix']) # Drop rows if VIX still NaN after ffill/bfill
+                    # Ensure 'timestamp' is the index for merging VIX
+                    if 'timestamp' in vix_df.columns:
+                        vix_df = vix_df.set_index('timestamp')
+                    if 'timestamp' in processed_data.columns:
+                         processed_data = processed_data.set_index('timestamp')
+
+                    # Select only the 'close' column and rename it to 'vix'
+                    vix_to_merge = vix_df[['close']].rename(columns={'close': 'vix'})
+
+                    # Perform an INNER merge to keep only common dates
+                    processed_data = processed_data.join(vix_to_merge, how="inner")
+
+                    # Reset index to bring 'timestamp' back as a column
+                    processed_data = processed_data.reset_index()
+
+                    # No need for ffill/bfill/dropna after inner merge for alignment purposes
                     print("VIX data added successfully.")
                     vix_successfully_added = True
                 except KeyError: # Catch error if 'timestamp' column is genuinely missing
@@ -387,37 +396,12 @@ def process_data(data, technical_indicator_list, start_date, end_date, if_vix=Tr
 
     # Ensure 'tic' column exists if dataframe is not empty
     if not processed_data.empty and 'tic' not in processed_data.columns:
-         print("CRITICAL WARNING: 'tic' column missing before df_to_array!")
-         # Add a dummy 'tic' column if it's missing, otherwise df_to_array will fail
-         # This might indicate a problem earlier in the data loading/cleaning
-         processed_data['tic'] = 'UNKNOWN' # This is a fallback, ideally 'tic' should always be present
+             print("CRITICAL WARNING: 'tic' column missing before df_to_array!")
+             # Add a dummy 'tic' column if it's missing, otherwise df_to_array will fail
+             # This might indicate a problem earlier in the data loading/cleaning
+             processed_data['tic'] = 'UNKNOWN' # This is a fallback, ideally 'tic' should always be present
 
     print(f"Columns just before df_to_array: {processed_data.columns.tolist()}")
-
-    # Ensure VIX data aligns with the final processed_data index before calling df_to_array
-    if vix_successfully_added and 'vix' in processed_data.columns:
-        processed_data = processed_data.set_index('timestamp')
-        if 'vix' not in processed_data.columns: # Check if 'vix' column exists after potential index setting
-             print("Error: 'vix' column lost after setting index.")
-        else:
-             # Align vix_df (which should have 'vix' column) to processed_data index
-             # Assuming vix_df was the source of 'vix' column data
-             # Re-load vix_df if necessary or ensure it's available
-             # This part needs careful review based on where vix_df is defined and modified
-             # For now, let's assume vix_df is accessible and has the 'vix' column
-             # Re-aligning might not be necessary if merge was correct, but as a safeguard:
-             try:
-                 # Assuming vix_df holds the original VIX data before potential merges
-                 vix_df_aligned = vix_df.set_index('timestamp').reindex(processed_data.index)
-                 processed_data['vix'] = vix_df_aligned['vix']
-                 processed_data = processed_data.reset_index() # Reset index back
-             except Exception as align_err:
-                 print(f"Error aligning VIX data before df_to_array: {align_err}")
-                 # Decide how to handle this: proceed without VIX or raise error?
-                 # For now, let's proceed but warn
-                 print("Warning: Could not realign VIX data. Proceeding without guaranteed alignment.")
-                 if 'timestamp' not in processed_data.columns: # Ensure timestamp is back if reset failed
-                     processed_data = processed_data.reset_index()
 
     # Convert to array
     if processed_data.empty:
