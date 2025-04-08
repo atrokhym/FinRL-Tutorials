@@ -45,13 +45,13 @@ def run_script(script_path, log_level_str="INFO", extra_args=None):
             command.extend(extra_args) # Add extra arguments if provided
         logging.debug(f"Running command: {' '.join(command)}")
         # Note: Subprocess environment is inherited by default
-        result = subprocess.run(command, check=True, capture_output=True, text=True)
-        # Revert: Log stdout/stderr at debug level. File logging is now handled by sub-scripts directly.
-        # This captured output might still be useful for debugging main.py itself.
-        logging.debug(f"Script Output:\n{result.stdout}")
-        if result.stderr:
-            logging.debug(f"Script Error Output:\n{result.stderr}")
-        logging.info(f"Script {script_path} finished successfully.")
+        # Removed capture_output=True to allow subprocess output to stream to console
+        result = subprocess.run(command, check=True, text=True)
+        # # Removed logging of captured stdout/stderr as it's no longer captured
+        # logging.debug(f"Script Output:\n{result.stdout}")
+        # if result.stderr:
+        #     logging.debug(f"Script Error Output:\n{result.stderr}")
+        logging.info(f"Script {script_path} finished successfully (Return Code: {result.returncode}).")
         return True
     except FileNotFoundError:
         logging.error(f"Script not found: {script_path}")
@@ -59,8 +59,11 @@ def run_script(script_path, log_level_str="INFO", extra_args=None):
     except subprocess.CalledProcessError as e:
         logging.error(f"Error executing script {script_path}:")
         logging.error(f"Return Code: {e.returncode}")
-        logging.error(f"Output:\n{e.stdout}")
-        logging.error(f"Error Output:\n{e.stderr}")
+        # Stderr/Stdout might be None if capture_output was False, or might be printed directly
+        if e.stdout:
+            logging.error(f"Output:\n{e.stdout}")
+        if e.stderr:
+            logging.error(f"Error Output:\n{e.stderr}")
         return False
     except Exception as e:
         logging.error(f"An unexpected error occurred while running {script_path}: {e}", exc_info=True)

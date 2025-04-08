@@ -86,10 +86,18 @@ def train_model(total_timesteps: int, model_suffix: str = "", log_level: str = "
         train_df['date'] = pd.to_datetime(train_df['date'])
         train_df = train_df.sort_values(by=['date', 'tic']).reset_index(drop=True)
         logging.info(f"Loaded processed data from: {processed_filepath}")
-        logging.info(f"Using training data for period: {train_df['date'].min()} to {train_df['date'].max()}. Shape: {train_df.shape}")
+
+        # --- Filter Data for Combined Training + Validation Period ---
+        logging.info(f"Filtering data for final training: {settings.TRAIN_START_DATE} to {settings.VALIDATION_END_DATE}")
+        train_df = train_df[
+            (train_df['date'] >= settings.TRAIN_START_DATE) &
+            (train_df['date'] <= settings.VALIDATION_END_DATE)
+        ].reset_index(drop=True)
+        logging.info(f"Final training data period: {train_df['date'].min()} to {train_df['date'].max()}. Shape: {train_df.shape}")
+        # --- End Filtering ---
 
         if train_df.empty:
-            logging.error("Loaded data is empty. Check the preprocessing step.")
+            logging.error("Filtered training data is empty. Check date ranges and preprocessing step.")
             sys.exit(1)
 
     except FileNotFoundError:

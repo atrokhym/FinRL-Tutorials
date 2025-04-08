@@ -23,12 +23,17 @@ INDICATORS = [
 ]
 INDICATORS_WITH_TURBULENCE = INDICATORS + ['turbulence'] # Define a list including turbulence
 
-# Training/Testing Periods
-TRAIN_START_DATE = "2015-01-01"
-TRAIN_END_DATE = "2022-12-31"
-TEST_START_DATE = "2023-01-01"
-TEST_END_DATE = "2024-12-31"
 TIME_INTERVAL = '1D'  # Maps to Alpaca timeframe
+
+# Training/Testing/Validation Periods
+TRAIN_START_DATE = "2015-01-01"
+TRAIN_END_DATE = "2020-12-31"      # Shortened to make room for validation
+
+VALIDATION_START_DATE = "2021-01-01"
+VALIDATION_END_DATE = "2022-12-31" # Your original train end date
+
+TEST_START_DATE = "2023-01-01"     # Unchanged
+TEST_END_DATE = "2024-12-31"       # Unchanged
 
 # Paper Trading Period
 PAPER_TRADE_START_DATE = "2025-01-01"

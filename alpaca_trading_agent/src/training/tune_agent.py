@@ -71,12 +71,11 @@ except ImportError as e:
     logging.error("Ensure config/settings.py and src/environment/trading_env.py exist.")
     sys.exit(1)
 
+
 # --- Tuning Parameters ---
-N_TRIALS = 100  # Number of Optuna trials to run (Increased from 20)
-TUNING_TIMESTEPS = 50000  # Timesteps per trial (reduced for faster tuning)
-VALIDATION_SPLIT_RATIO = (
-    0.8  # Use 80% for training, 20% for validation within the trial
-)
+N_TRIALS = 50              # Reduced from 100 for better time efficiency
+TUNING_TIMESTEPS = 100000  # Increased from 50000 for more stable evaluation
+EVAL_EPISODES = 10         # Number of episodes to evaluate each trial on validation set
 
 # Create results directory if it doesn't exist
 os.makedirs(RESULTS_DIR, exist_ok=True)
@@ -104,29 +103,24 @@ try:
         f"Data shape: {data_df.shape}, Date range: {data_df['date'].min()} to {data_df['date'].max()}"
     )
 
-    # --- Split Data for Tuning (Train/Validation) ---
-    # Split the loaded data directly using the ratio
-    unique_dates = data_df["date"].unique()
-    if len(unique_dates) < 2:  # Need at least 2 unique dates to split
-        logging.error(
-            "Not enough unique dates in the loaded data to perform train/validation split for tuning."
-        )
-        sys.exit(1)
+    # --- Split Data for Tuning (Train/Validation) based on settings.py ---
+    logging.info(f"Filtering data for tuning using dates from settings.py:")
+    logging.info(f"  Train Period: {settings.TRAIN_START_DATE} to {settings.TRAIN_END_DATE}")
+    logging.info(f"  Validation Period: {settings.VALIDATION_START_DATE} to {settings.VALIDATION_END_DATE}")
 
-    split_index = int(len(unique_dates) * VALIDATION_SPLIT_RATIO)
-    # Ensure split_index is at least 1 to have some validation data
-    split_index = max(1, split_index)
-    # Ensure split index is not beyond the last date to avoid empty validation set
-    split_index = min(split_index, len(unique_dates) - 1)
+    train_split_df = data_df[
+        (data_df["date"] >= settings.TRAIN_START_DATE) &
+        (data_df["date"] <= settings.TRAIN_END_DATE)
+    ].reset_index(drop=True)
 
-    split_date = unique_dates[split_index]
-
-    train_split_df = data_df[data_df["date"] < split_date].reset_index(drop=True)
-    validation_df = data_df[data_df["date"] >= split_date].reset_index(drop=True)
+    validation_df = data_df[
+        (data_df["date"] >= settings.VALIDATION_START_DATE) &
+        (data_df["date"] <= settings.VALIDATION_END_DATE)
+    ].reset_index(drop=True)
 
     if train_split_df.empty or validation_df.empty:
         logging.error(
-            "Train or validation split resulted in empty DataFrame. Check data content and split ratio."
+            "Train or validation split resulted in empty DataFrame. Check data content and date ranges in settings.py."
         )
         sys.exit(1)
 
@@ -161,6 +155,8 @@ def objective(trial: optuna.Trial) -> float:
     gamma = trial.suggest_float("gamma", 0.9, 0.9999)
     ent_coef = trial.suggest_float("ent_coef", 0.0, 0.1)
     clip_range = trial.suggest_categorical("clip_range", [0.1, 0.2, 0.3])
+    gae_lambda = trial.suggest_float("gae_lambda", 0.9, 0.99)
+    max_grad_norm = trial.suggest_float("max_grad_norm", 0.5, 1.0)
 
     # --- Add net_arch tuning ---
     net_arch_str = trial.suggest_categorical(
@@ -194,11 +190,11 @@ def objective(trial: optuna.Trial) -> float:
         "batch_size": batch_size,
         "n_epochs": 10,  # Keep fixed or tune as well?
         "gamma": gamma,
-        "gae_lambda": 0.95,  # Keep fixed or tune?
+        "gae_lambda": gae_lambda,  # Keep fixed or tune?
         "clip_range": clip_range,
         "ent_coef": ent_coef,
         "vf_coef": 0.5,  # Keep fixed or tune?
-        "max_grad_norm": 0.5,  # Keep fixed or tune?
+        "max_grad_norm": max_grad_norm,  # Keep fixed or tune?
         "learning_rate": learning_rate,
         "verbose": 0,  # Reduce verbosity during tuning
         "seed": SEED + trial.number,  # Use different seed per trial (Use defined SEED)
@@ -208,12 +204,12 @@ def objective(trial: optuna.Trial) -> float:
 
     try:
         model = PPO(**model_params)
-        # Configure SB3 logger for TensorBoard
-        # Ensure study_name is accessible (defined in __main__)
-        tb_log_path = os.path.join(RESULTS_DIR, "tuning", "tensorboard_logs", study_name, f"trial_{trial.number}")
-        os.makedirs(tb_log_path, exist_ok=True) # Ensure the directory exists
-        new_logger = sb3_configure_logger(tb_log_path, ["tensorboard"])
-        model.set_logger(new_logger)
+        # # Configure SB3 logger for TensorBoard (REMOVED FOR TUNING EFFICIENCY)
+        # # Ensure study_name is accessible (defined in __main__)
+        # tb_log_path = os.path.join(RESULTS_DIR, "tuning", "tensorboard_logs", study_name, f"trial_{trial.number}")
+        # os.makedirs(tb_log_path, exist_ok=True) # Ensure the directory exists
+        # new_logger = sb3_configure_logger(tb_log_path, ["tensorboard"])
+        # model.set_logger(new_logger)
     except Exception as e:
         logging.exception(
             f"Trial {trial.number}: Failed during PPO model configuration."
@@ -226,15 +222,16 @@ def objective(trial: optuna.Trial) -> float:
         # Set it to a reasonable value, like 1024 or n_steps / 10, instead of None
         log_interval_freq = max(1, n_steps // 10) # Log roughly 10 times per training session
 
-        # Instantiate the custom callback (with verbosity=1 to see debug logs)
-        # Pass the tb_log_path as the required log_dir argument
-        custom_callback = TensorboardCallback(log_dir=tb_log_path, verbose=1)
-        logging.info(f"Trial {trial.number}: Using custom TensorboardCallback with log_dir: {tb_log_path}")
+        # # Instantiate the custom callback (REMOVED FOR TUNING EFFICIENCY)
+        # # Pass the tb_log_path as the required log_dir argument
+        # custom_callback = TensorboardCallback(log_dir=tb_log_path, verbose=1)
+        # logging.info(f"Trial {trial.number}: Using custom TensorboardCallback with log_dir: {tb_log_path}")
 
         model.learn(
             total_timesteps=TUNING_TIMESTEPS,
             log_interval=log_interval_freq,
-            callback=custom_callback # Add the custom callback here
+            callback=None # No callback needed if not logging to TensorBoard per trial
+            # callback=custom_callback # Add the custom callback here
         )
         logging.info(f"Trial {trial.number}: Training finished.")
     except Exception as e:
@@ -242,60 +239,99 @@ def objective(trial: optuna.Trial) -> float:
             f"Trial {trial.number}: Error during model training."
         )  # Use logging.exception
         return -np.inf  # Indicate failure
+    finally:
+        # Ensure training env is closed even if training fails before eval
+        if "env_train_trial" in locals():
+            env_train_trial.close()
 
-    # 5. Evaluate Agent on Validation Set
+    # 5. Evaluate Agent on Validation Set (New Approach: Mean Reward over multiple episodes)
+    mean_reward = -np.inf # Default to worst possible value
     try:
         env_validation = create_env(validation_df)  # Create single instance for eval
-        obs, info = env_validation.reset()
-        terminated = False
-        truncated = False
-        total_reward_validation = 0.0
-        account_value_validation = env_validation.initial_amount
+        episode_rewards = []
+        logging.info(f"Trial {trial.number}: Starting validation over {EVAL_EPISODES} episodes...")
 
-        while not (terminated or truncated):
-            action, _states = model.predict(obs, deterministic=True)
-            obs, reward, terminated, truncated, info = env_validation.step(action)
-            total_reward_validation += reward
-            if terminated or truncated:
-                # Get final account value from the environment's memory
-                if (
-                    hasattr(env_validation, "asset_memory")
-                    and env_validation.asset_memory
-                ):
-                    account_value_validation = env_validation.asset_memory[-1]
-                else:  # Fallback if asset_memory isn't available/reliable
-                    account_value_validation = info.get(
-                        "total_asset", env_validation.initial_amount
-                    )  # Use info if available
-                break
+        for i in range(EVAL_EPISODES):
+            obs, info = env_validation.reset()
+            terminated = False
+            truncated = False
+            episode_reward = 0.0
+            while not (terminated or truncated):
+                # Use deterministic=True for consistent evaluation
+                action, _states = model.predict(obs, deterministic=True)
+                obs, reward, terminated, truncated, info = env_validation.step(action)
+                episode_reward += reward
+            episode_rewards.append(episode_reward)
+            logging.debug(f"Trial {trial.number} Eval Episode {i+1}/{EVAL_EPISODES} finished. Reward: {episode_reward:.4f}")
 
+        mean_reward = np.mean(episode_rewards) if episode_rewards else -np.inf
         logging.info(
-            f"Trial {trial.number}: Validation finished. Final Account Value: {account_value_validation:.2f}"
+            f"Trial {trial.number}: Validation finished. Mean Reward over {EVAL_EPISODES} episodes: {mean_reward:.4f}"
         )
 
     except Exception as e:
         logging.exception(
             f"Trial {trial.number}: Error during validation."
         )  # Use logging.exception
-        return -np.inf  # Indicate failure
+        # mean_reward remains -np.inf
     finally:
-        # Ensure environments are closed
-        if "env_train_trial" in locals():
-            env_train_trial.close()
+        # Ensure validation env is closed
         if "env_validation" in locals() and hasattr(env_validation, "close"):
             env_validation.close()
+
+    # # 5. Evaluate Agent on Validation Set (Old Approach: Final Account Value in one episode)
+    # # try:
+    # #     env_validation = create_env(validation_df)  # Create single instance for eval
+    # #     obs, info = env_validation.reset()
+    # #     terminated = False
+    # #     truncated = False
+    # #     total_reward_validation = 0.0
+    # #     account_value_validation = env_validation.initial_amount
+    # #
+    # #     while not (terminated or truncated):
+    # #         action, _states = model.predict(obs, deterministic=True)
+    # #         obs, reward, terminated, truncated, info = env_validation.step(action)
+    # #         total_reward_validation += reward
+    # #         if terminated or truncated:
+    # #             # Get final account value from the environment's memory
+    # #             if (
+    # #                 hasattr(env_validation, "asset_memory")
+    # #                 and env_validation.asset_memory
+    # #             ):
+    # #                 account_value_validation = env_validation.asset_memory[-1]
+    # #             else:  # Fallback if asset_memory isn't available/reliable
+    # #                 account_value_validation = info.get(
+    # #                     "total_asset", env_validation.initial_amount
+    # #                 )  # Use info if available
+    # #             break
+    # #
+    # #     logging.info(
+    # #         f"Trial {trial.number}: Validation finished. Final Account Value: {account_value_validation:.2f}"
+    # #     )
+    # #
+    # # except Exception as e:
+    # #     logging.exception(
+    # #         f"Trial {trial.number}: Error during validation."
+    # #     )  # Use logging.exception
+    # #     return -np.inf  # Indicate failure
+    # # finally:
+    # #     # Ensure environments are closed (moved to outer finally)
+    # #     # if "env_train_trial" in locals():
+    # #     #     env_train_trial.close()
+    # #     if "env_validation" in locals() and hasattr(env_validation, "close"):
+    # #         env_validation.close()
 
     trial_duration = time.time() - trial_start_time
     logging.info(
         f"--- Optuna Trial {trial.number} Finished (Duration: {trial_duration:.2f}s) ---"
     )
 
-    # 6. Return Metric (Final portfolio value on validation set)
+    # 6. Return Metric (Mean reward over validation episodes)
     # Handle cases where validation might result in NaN or Inf
-    if np.isnan(account_value_validation) or np.isinf(account_value_validation):
-        return -np.inf
+    if np.isnan(mean_reward) or np.isinf(mean_reward):
+        return -np.inf # Return worst value if calculation failed
 
-    return account_value_validation
+    return mean_reward
 
 
 # --- Run Optuna Study ---
