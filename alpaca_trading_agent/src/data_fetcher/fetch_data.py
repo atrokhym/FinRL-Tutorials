@@ -5,9 +5,9 @@ import pandas as pd
 import os
 from datetime import datetime
 import logging
+import argparse # Added argparse
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# Logging setup will be done explicitly using the shared utility
 
 # --- Configuration Loading ---
 # Correctly navigate up two levels from src/data_fetcher to the project root
@@ -18,7 +18,18 @@ DATA_DIR = os.path.join(PROJECT_ROOT, 'data')
 
 # Add project root to sys.path to allow absolute imports from config
 import sys
-sys.path.insert(0, PROJECT_ROOT) # Add project root instead of just config
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT) # Add project root if not already there
+
+# Import the logging setup utility
+try:
+    from src.utils.logging_setup import configure_file_logging
+except ImportError:
+    # Fallback if the utility somehow isn't found
+    logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
+    logging.error("Failed to import configure_file_logging from src.utils. Cannot configure file logging.")
+    # Optionally exit if logging is critical
+    # sys.exit(1)
 
 try:
     from config import settings
@@ -101,9 +112,10 @@ def fetch_historical_data(tickers, start_date, end_date, timeframe='1Day', limit
     # Convert to market time (usually Eastern Time) for easier analysis
     combined_df.index = combined_df.index.tz_convert('America/New_York')
     combined_df.index = combined_df.index.date # Keep only the date part if using daily data
+    combined_df.index.name = 'date' # Explicitly name the index
 
     # Reset index to have 'date' and 'tic' as columns if needed by FinRL preprocessing
-    # combined_df = combined_df.reset_index().rename(columns={'index': 'date'})
+    # combined_df = combined_df.reset_index() # No rename needed if index is named 'date'
     # combined_df = combined_df.set_index(['date', 'tic']) # Or keep date as index, tic as column
 
     # Standardize column names (FinRL often expects lowercase)
@@ -112,48 +124,60 @@ def fetch_historical_data(tickers, start_date, end_date, timeframe='1Day', limit
     logging.info(f"Finished fetching data. Shape: {combined_df.shape}")
     return combined_df
 
+# Logging setup is now handled explicitly below using the shared utility
 # --- Main Execution ---
 if __name__ == "__main__":
-    logging.info("--- Starting Data Fetching Script ---")
+    parser = argparse.ArgumentParser(description="Data Fetcher for Alpaca Trading Agent")
+    parser.add_argument(
+        '--log-level',
+        default='INFO',
+        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+        help="Set the logging level for the script."
+    )
+    parser.add_argument(
+        '--train-end-date',
+        type=str,
+        default=None,
+        help="Specify the end date for fetching data in YYYY-MM-DD format. Overrides settings.py TRAIN_END_DATE."
+    )
+    args = parser.parse_args()
 
-    # Fetch training data
-    train_data = fetch_historical_data(
+    # --- Configure Logging for this script ---
+    # Use the log level passed from main.py via command-line arguments
+    configure_file_logging(args.log_level)
+    # Note: Console logging is not added here by default. main.py handles its own console log.
+    # If you needed console logging *from this script specifically*, you could call add_console_logging here.
+
+    logging.info(f"--- Starting Data Fetching Script (PID: {os.getpid()}) ---")
+
+    # Determine the end date to use
+    end_date_to_use = args.train_end_date if args.train_end_date else settings.TRAIN_END_DATE
+    if args.train_end_date:
+        logging.info(f"Using command-line end date: {end_date_to_use}")
+    else:
+        logging.info(f"Using end date from settings: {end_date_to_use}")
+
+    # Fetch data up to the determined end date
+    raw_data = fetch_historical_data(
         tickers=settings.TICKERS,
-        start_date=settings.TRAIN_START_DATE,
-        end_date=settings.TRAIN_END_DATE,
-        timeframe=settings.TIME_INTERVAL # Corrected variable name
+        start_date=settings.TRAIN_START_DATE, # Start date is still from settings
+        end_date=end_date_to_use,
+        timeframe=settings.TIME_INTERVAL
     )
 
-    if train_data is not None and not train_data.empty:
-        # Save training data
-        train_filename = f"train_data_{settings.TRAIN_START_DATE}_{settings.TRAIN_END_DATE}.csv"
-        train_filepath = os.path.join(DATA_DIR, train_filename)
+    if raw_data is not None and not raw_data.empty:
+        # Save data to a standardized filename
+        raw_filename = "raw_data.csv"
+        raw_filepath = os.path.join(DATA_DIR, raw_filename)
         try:
-            train_data.to_csv(train_filepath)
-            logging.info(f"Training data saved successfully to {train_filepath}")
+            # Explicitly set separator to PIPE, ensure index and header are written
+            raw_data.to_csv(raw_filepath, sep='|', index=True, header=True)
+            logging.info(f"Raw data ({settings.TRAIN_START_DATE} to {end_date_to_use}) saved successfully to {raw_filepath} with '|' separator")
         except Exception as e:
-            logging.error(f"Failed to save training data: {e}")
+            logging.error(f"Failed to save raw data: {e}")
     else:
-        logging.warning("No training data was fetched or it was empty.")
+        logging.warning("No raw data was fetched or it was empty.")
 
-    # Fetch testing data (used for backtesting the trained model)
-    test_data = fetch_historical_data(
-        tickers=settings.TICKERS,
-        start_date=settings.TEST_START_DATE,
-        end_date=settings.TEST_END_DATE,
-        timeframe=settings.TIME_INTERVAL # Corrected variable name
-    )
-
-    if test_data is not None and not test_data.empty:
-        # Save testing data
-        test_filename = f"test_data_{settings.TEST_START_DATE}_{settings.TEST_END_DATE}.csv"
-        test_filepath = os.path.join(DATA_DIR, test_filename)
-        try:
-            test_data.to_csv(test_filepath)
-            logging.info(f"Testing data saved successfully to {test_filepath}")
-        except Exception as e:
-            logging.error(f"Failed to save testing data: {e}")
-    else:
-        logging.warning("No testing data was fetched or it was empty.")
+    # Removed the separate fetching and saving of test data
 
     logging.info("--- Data Fetching Script Finished ---")

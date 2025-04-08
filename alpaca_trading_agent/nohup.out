@@ -1,0 +1,14 @@
+2025-04-04 14:14:29,853 - root - INFO - --- Console Logging Added (Level: DEBUG) ---
+2025-04-04 14:14:29,854 - root - INFO - --- Main Orchestrator Logging Initialized (Level: DEBUG) ---
+2025-04-04 14:14:29,854 - root - INFO - Console logging enabled: True
+2025-04-04 14:14:29,854 - root - INFO - --- Running in mode: papertrade ---
+2025-04-04 14:14:29,854 - root - INFO - --- Step: Starting Paper Trading Agent ---
+2025-04-04 14:14:29,854 - root - INFO - Executing script: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/src/trading/alpaca_papertrader.py with log level DEBUG
+2025-04-04 14:14:29,854 - root - DEBUG - Running command: /home/andrew/miniforge3/envs/finrl/bin/python /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/src/trading/alpaca_papertrader.py --log-level DEBUG
+2025-04-07 15:10:11,683 - root - INFO - --- Console Logging Added (Level: DEBUG) ---
+2025-04-07 15:10:11,684 - root - INFO - --- Main Orchestrator Logging Initialized (Level: DEBUG) ---
+2025-04-07 15:10:11,684 - root - INFO - Console logging enabled: True
+2025-04-07 15:10:11,684 - root - INFO - --- Running in mode: papertrade ---
+2025-04-07 15:10:11,684 - root - INFO - --- Step: Starting Paper Trading Agent ---
+2025-04-07 15:10:11,684 - root - INFO - Executing script: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/src/trading/alpaca_papertrader.py with log level DEBUG
+2025-04-07 15:10:11,684 - root - DEBUG - Running command: /home/andrew/miniforge3/envs/finrl/bin/python /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/src/trading/alpaca_papertrader.py --log-level DEBUG

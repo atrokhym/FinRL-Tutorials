@@ -3,6 +3,7 @@
 import argparse
 import argparse
 import logging
+# import logging.handlers # No longer needed here
 import os
 import sys
 import subprocess # To call other scripts
@@ -10,6 +11,17 @@ import subprocess # To call other scripts
 # --- Project Setup ---
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 SRC_DIR = os.path.join(PROJECT_ROOT, 'src')
+# LOG_DIR and LOG_FILE are now defined in the utility
+# Ensure src is in path to find utils module
+if SRC_DIR not in sys.path:
+    sys.path.insert(0, SRC_DIR)
+try:
+    # Import the setup functions from the new utility module
+    from utils.logging_setup import configure_file_logging, add_console_logging
+except ImportError:
+    logging.basicConfig(level=logging.ERROR) # Basic config for error message
+    logging.error("Failed to import logging_setup from src.utils. Ensure src/utils/logging_setup.py exists.")
+    sys.exit(1)
 DATA_FETCHER_SCRIPT = os.path.join(SRC_DIR, 'data_fetcher', 'fetch_data.py')
 PREPROCESS_SCRIPT = os.path.join(SRC_DIR, 'preprocessing', 'preprocess_data.py')
 TRAIN_SCRIPT = os.path.join(SRC_DIR, 'training', 'train_agent.py')
@@ -18,8 +30,7 @@ BACKTEST_SCRIPT = os.path.join(SRC_DIR, 'backtesting', 'backtest_agent.py')
 WALKFORWARD_SCRIPT = os.path.join(SRC_DIR, 'backtesting', 'walkforward_backtest.py') # Added walkforward script path
 PAPERTRADE_SCRIPT = os.path.join(SRC_DIR, 'trading', 'alpaca_papertrader.py')
 
-# Ensure src directory is in path if needed (though scripts should handle their own imports)
-# sys.path.insert(0, SRC_DIR)
+# Path setup moved above import
 
 # --- Helper Function to Run Scripts ---
 def run_script(script_path, log_level_str="INFO", extra_args=None):
@@ -35,10 +46,11 @@ def run_script(script_path, log_level_str="INFO", extra_args=None):
         logging.debug(f"Running command: {' '.join(command)}")
         # Note: Subprocess environment is inherited by default
         result = subprocess.run(command, check=True, capture_output=True, text=True)
-        # Log stdout/stderr at debug level to avoid cluttering INFO logs unless needed
+        # Revert: Log stdout/stderr at debug level. File logging is now handled by sub-scripts directly.
+        # This captured output might still be useful for debugging main.py itself.
         logging.debug(f"Script Output:\n{result.stdout}")
         if result.stderr:
-            logging.debug(f"Script Error Output:\n{result.stderr}") # Use debug for stderr too
+            logging.debug(f"Script Error Output:\n{result.stderr}")
         logging.info(f"Script {script_path} finished successfully.")
         return True
     except FileNotFoundError:
@@ -55,21 +67,18 @@ def run_script(script_path, log_level_str="INFO", extra_args=None):
         return False
 
 # --- Argument Parsing ---
-def setup_logging(level_str="INFO"):
-    """Configures the root logger."""
-    level = getattr(logging, level_str.upper(), logging.INFO)
-    # Remove existing handlers to avoid duplicate messages if re-configured
-    for handler in logging.root.handlers[:]:
-        logging.root.removeHandler(handler)
-    # Configure root logger first
-    logging.basicConfig(level=level, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', force=True)
-    # Set higher level for noisy libraries like matplotlib
-    logging.getLogger('matplotlib').setLevel(logging.WARNING)
-    logging.getLogger('matplotlib.font_manager').setLevel(logging.WARNING) # Be specific if needed
-    logging.info(f"Root logging configured to level: {level_str.upper()}")
-    logging.info(f"Matplotlib logging level set to WARNING to reduce verbosity.")
+def setup_logging(level_str="INFO", enable_console=True):
+    """Configures logging using the shared utility."""
+    # Configure file logging (mandatory)
+    configure_file_logging(level_str)
 
+    # Optionally add console logging
+    if enable_console:
+        add_console_logging(level_str)
 
+    # The utility already handles noisy libraries and initial log messages.
+    logging.info(f"--- Main Orchestrator Logging Initialized (Level: {level_str.upper()}) ---")
+    logging.info(f"Console logging enabled: {enable_console}")
 def main():
     parser = argparse.ArgumentParser(description="Alpaca Trading Agent Orchestrator")
     # Main mode argument
@@ -90,6 +99,13 @@ def main():
         '--skip-tuning',
         action='store_true',
         help="[Walkforward Mode Only] Skip hyperparameter tuning for each window."
+    )
+    # Argument for dynamic training end date
+    parser.add_argument(
+        '--train-end-date',
+        type=str,
+        default=None, # Default to None, meaning settings.py dates will be used unless overridden
+        help="Specify the end date for training data in YYYY-MM-DD format. Overrides settings.py TRAIN_END_DATE for fetch/preprocess."
     )
 
     args = parser.parse_args()
@@ -118,15 +134,22 @@ def main():
     else:
          script_log_level_backtest = script_log_level # Use default for non-backtest steps in 'all'
 
+    # --- Prepare Extra Arguments ---
+    # Arguments to pass specifically to fetch/preprocess if --train-end-date is given
+    fetch_preprocess_extra_args = []
+    if args.train_end_date:
+        logging.info(f"Overriding training end date with command-line argument: {args.train_end_date}")
+        fetch_preprocess_extra_args.extend(['--train-end-date', args.train_end_date])
+
     if args.mode == 'fetch' or args.mode == 'all':
         logging.info("--- Step: Fetching Data ---")
-        if not run_script(DATA_FETCHER_SCRIPT, script_log_level):
+        if not run_script(DATA_FETCHER_SCRIPT, script_log_level, extra_args=fetch_preprocess_extra_args):
             logging.error("Data fetching failed. Aborting.")
             if args.mode == 'all': sys.exit(1)
 
     if args.mode == 'preprocess' or args.mode == 'all':
         logging.info("--- Step: Preprocessing Data ---")
-        if not run_script(PREPROCESS_SCRIPT, script_log_level):
+        if not run_script(PREPROCESS_SCRIPT, script_log_level, extra_args=fetch_preprocess_extra_args):
             logging.error("Data preprocessing failed. Aborting.")
             if args.mode == 'all': sys.exit(1)
 
@@ -166,6 +189,7 @@ def main():
             logging.error("Failed to start paper trading agent.")
 
     logging.info(f"--- Mode '{args.mode}' finished. ---")
+
 
 if __name__ == "__main__":
     main()

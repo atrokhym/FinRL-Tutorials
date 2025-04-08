@@ -5,17 +5,23 @@ import numpy as np
 from stockstats import StockDataFrame as Sdf
 import os
 import logging
+import argparse # Added argparse
+import sys # Added sys
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# Add src directory to sys.path to allow importing utils
+SRC_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, SRC_DIR)
 
+# Logging setup will be done explicitly using the shared utility
+from utils.logging_setup import configure_file_logging
 # --- Configuration Loading ---
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 CONFIG_DIR = os.path.join(PROJECT_ROOT, 'config')
 DATA_DIR = os.path.join(PROJECT_ROOT, 'data')
+# SRC_DIR is already defined above
 
 # Add config directory to sys.path
-import sys
+# import sys # Already imported above
 sys.path.insert(0, CONFIG_DIR)
 
 try:
@@ -166,58 +172,88 @@ def preprocess_data(df: pd.DataFrame, is_live_trading: bool = False) -> pd.DataF
 
     return df
 
+# Logging setup is handled by the calling script (main.py)
+# This script inherits the logger configuration.
 # --- Main Execution ---
 if __name__ == "__main__":
-    logging.info("--- Starting Data Preprocessing Script (for Walk-Forward) ---")
+    parser = argparse.ArgumentParser(description="Data Preprocessor for Alpaca Trading Agent")
+    parser.add_argument(
+        '--log-level',
+        default='INFO',
+        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+        help="Set the logging level for the script."
+    )
+    parser.add_argument(
+        '--train-end-date',
+        type=str,
+        default=None,
+        help="Specify the end date for filtering data in YYYY-MM-DD format. Overrides settings.py TRAIN_END_DATE."
+    )
+    args = parser.parse_args()
 
-    # --- Load Raw Data (Combine Train and Test for Full Period) ---
-    train_filename = f"train_data_{settings.TRAIN_START_DATE}_{settings.TRAIN_END_DATE}.csv"
-    train_filepath = os.path.join(DATA_DIR, train_filename)
-    test_filename = f"test_data_{settings.TEST_START_DATE}_{settings.TEST_END_DATE}.csv"
-    test_filepath = os.path.join(DATA_DIR, test_filename)
+    # --- Configure Logging for this script ---
+    configure_file_logging(args.log_level)
+    # Note: Console logging is not added here by default.
 
-    loaded_dfs = []
+    logging.info(f"--- Starting Data Preprocessing Script (PID: {os.getpid()}) ---")
+
+    # --- Define Standardized Filenames ---
+    raw_filename = "raw_data.csv"
+    raw_filepath = os.path.join(DATA_DIR, raw_filename)
+    processed_filename = "processed_data.csv"
+    processed_filepath = os.path.join(DATA_DIR, processed_filename)
+
+    # --- Load Raw Data ---
     try:
-        raw_train_df = pd.read_csv(train_filepath, index_col=0, parse_dates=True)
-        loaded_dfs.append(raw_train_df)
-        logging.info(f"Loaded raw training data from {train_filepath} ({raw_train_df.index.min().date()} to {raw_train_df.index.max().date()})")
+        raw_df = pd.read_csv(raw_filepath, index_col=0, delimiter='|')  # Specify pipe delimiter
+        # Ensure index is datetime for filtering
+        raw_df.index = pd.to_datetime(raw_df.index, format='%Y-%m-%d')  # Specify date format explicitly
+        logging.info(f"Loaded raw data from {raw_filepath}. Shape: {raw_df.shape}")
     except FileNotFoundError:
-        logging.error(f"Raw training data file not found: {train_filepath}. Cannot proceed.")
+        logging.error(f"Raw data file not found: {raw_filepath}. Run the fetch script first.")
         sys.exit(1)
     except Exception as e:
-        logging.error(f"Error loading raw training data: {e}. Cannot proceed.")
+        logging.error(f"Error loading raw data: {e}.")
         sys.exit(1)
 
-    try:
-        raw_test_df = pd.read_csv(test_filepath, index_col=0, parse_dates=True)
-        loaded_dfs.append(raw_test_df)
-        logging.info(f"Loaded raw testing data from {test_filepath} ({raw_test_df.index.min().date()} to {raw_test_df.index.max().date()})")
-    except FileNotFoundError:
-        logging.warning(f"Raw testing data file not found: {test_filepath}. Combining training data only.")
-    except Exception as e:
-        logging.error(f"Error loading raw testing data: {e}. Combining training data only.")
-
-    if not loaded_dfs:
-        logging.error("No data loaded. Exiting.")
-        sys.exit(1)
-
-    # Combine DataFrames
-    full_raw_df = pd.concat(loaded_dfs).sort_index()
-    logging.info(f"Combined raw data. Shape: {full_raw_df.shape}, Date range: {full_raw_df.index.min().date()} to {full_raw_df.index.max().date()}")
-
-    # --- Preprocess Combined Data ---
-    processed_full_df = preprocess_data(full_raw_df)
-
-    if processed_full_df is not None:
-        # Save the single combined processed file
-        processed_full_filename = "full_processed_combined.csv" # Simple filename
-        processed_full_filepath = os.path.join(DATA_DIR, processed_full_filename)
-        try:
-            processed_full_df.to_csv(processed_full_filepath, index=False)
-            logging.info(f"Full processed data saved to {processed_full_filepath}")
-        except Exception as e:
-            logging.error(f"Failed to save full processed data: {e}")
+    # --- Determine and Filter by End Date ---
+    end_date_to_use = args.train_end_date if args.train_end_date else settings.TRAIN_END_DATE
+    if args.train_end_date:
+        logging.info(f"Using command-line end date for filtering: {end_date_to_use}")
     else:
-        logging.error("Preprocessing failed for the combined dataset.")
+        logging.info(f"Using end date from settings for filtering: {end_date_to_use}")
+
+    try:
+        # Convert end_date_to_use to Timestamp for comparison (handle potential errors)
+        end_date_ts = pd.Timestamp(end_date_to_use)
+        filtered_df = raw_df[raw_df.index <= end_date_ts].copy()
+        logging.info(f"Filtered data up to {end_date_to_use}. Shape after filtering: {filtered_df.shape}")
+        if filtered_df.empty:
+            logging.warning(f"Dataframe is empty after filtering by end date {end_date_to_use}. Check date range and data.")
+    except ValueError:
+         logging.error(f"Invalid date format provided for --train-end-date: '{args.train_end_date}'. Use YYYY-MM-DD.")
+         sys.exit(1)
+    except Exception as e:
+        logging.error(f"Error filtering DataFrame by date: {e}")
+        sys.exit(1)
+
+
+    # --- Preprocess Filtered Data ---
+    if not filtered_df.empty:
+        processed_df = preprocess_data(filtered_df, is_live_trading=False) # Always False when run as script
+
+        if processed_df is not None and not processed_df.empty:
+            # --- Save Processed Data ---
+            try:
+                processed_df.to_csv(processed_filepath, index=False) # index=False as preprocess_data adds 'date' column
+                logging.info(f"Processed data saved to {processed_filepath}")
+                logging.info(f"Final processed data range: {processed_df['date'].min()} to {processed_df['date'].max()}")
+            except Exception as e:
+                logging.error(f"Failed to save processed data: {e}")
+        else:
+            logging.error("Preprocessing returned None or an empty DataFrame.")
+    else:
+        logging.warning("Skipping preprocessing and saving as the filtered DataFrame was empty.")
+
 
     logging.info("--- Data Preprocessing Script Finished ---")

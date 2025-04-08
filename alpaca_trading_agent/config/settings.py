@@ -44,7 +44,9 @@ STOCK_DIM = len(TICKERS)
 NUM_STOCK_FEATURES = len(INDICATORS_WITH_TURBULENCE)
 STATE_SPACE = 1 + STOCK_DIM + STOCK_DIM * NUM_STOCK_FEATURES
 ACTION_SPACE = STOCK_DIM
-TOTAL_TIMESTEPS = 20000         # Default total timesteps for training
+TOTAL_TIMESTEPS = 50000
+#20000
+#100,000, 500,000# Default total timesteps for training
 
 # Agent parameters (ElegantRL) - NOTE: Project currently uses Stable Baselines 3 (PPO)
 # ERL_PARAMS = {
