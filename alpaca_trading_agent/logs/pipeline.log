@@ -25406,3 +25406,91 @@ ValueError: Record does not exist.
 2025-04-07 23:14:25,103 - root - INFO - Initial state calculated.
 2025-04-07 23:14:25,103 - root - INFO - AlpacaStockTradingEnv initialized successfully (Manual Replication, starting day 0).
 2025-04-07 23:14:25,110 - root - INFO - Trial 12: Using custom TensorboardCallback with log_dir: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/results/tuning/tensorboard_logs/ppo-tuning-1D-1744080357/trial_12
+2025-04-07 23:17:10,840 - root - INFO - Trial 12: Training finished.
+2025-04-07 23:17:10,840 - root - INFO - Initializing AlpacaStockTradingEnv (Manual Replication)...
+2025-04-07 23:17:10,840 - root - INFO - Env using Transaction Cost: 0.100%, Slippage: 0.050%
+2025-04-07 23:17:10,841 - root - INFO - Searching for the first date with complete data for all tickers...
+2025-04-07 23:17:10,843 - root - INFO - Found first valid date: 2023-05-26 00:00:00 at index 0
+2025-04-07 23:17:10,843 - root - INFO - Setting initial self.data for date: 2023-05-26 00:00:00
+2025-04-07 23:17:10,843 - root - INFO - Initial self.data shape: (10, 15)
+2025-04-07 23:17:10,844 - root - INFO - Initial state calculated.
+2025-04-07 23:17:10,845 - root - INFO - AlpacaStockTradingEnv initialized successfully (Manual Replication, starting day 0).
+2025-04-07 23:17:11,649 - root - INFO - Trial 12: Validation finished. Final Account Value: 181406.10
+2025-04-07 23:17:11,649 - root - INFO - --- Optuna Trial 12 Finished (Duration: 166.60s) ---
+2025-04-07 23:17:11,697 - root - INFO - 
+--- Starting Optuna Trial 13 ---
+2025-04-07 23:17:11,742 - root - INFO - Initializing AlpacaStockTradingEnv (Manual Replication)...
+2025-04-07 23:17:11,742 - root - INFO - Env using Transaction Cost: 0.100%, Slippage: 0.050%
+2025-04-07 23:17:11,743 - root - INFO - Searching for the first date with complete data for all tickers...
+2025-04-07 23:17:11,744 - root - INFO - Found first valid date: 2016-01-04 00:00:00 at index 0
+2025-04-07 23:17:11,744 - root - INFO - Setting initial self.data for date: 2016-01-04 00:00:00
+2025-04-07 23:17:11,744 - root - INFO - Initial self.data shape: (10, 15)
+2025-04-07 23:17:11,745 - root - INFO - Initial state calculated.
+2025-04-07 23:17:11,745 - root - INFO - AlpacaStockTradingEnv initialized successfully (Manual Replication, starting day 0).
+2025-04-07 23:17:11,751 - root - INFO - Trial 13: Using custom TensorboardCallback with log_dir: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/results/tuning/tensorboard_logs/ppo-tuning-1D-1744080357/trial_13
+2025-04-07 23:19:57,066 - root - INFO - Trial 13: Training finished.
+2025-04-07 23:19:57,067 - root - INFO - Initializing AlpacaStockTradingEnv (Manual Replication)...
+2025-04-07 23:19:57,067 - root - INFO - Env using Transaction Cost: 0.100%, Slippage: 0.050%
+2025-04-07 23:19:57,067 - root - INFO - Searching for the first date with complete data for all tickers...
+2025-04-07 23:19:57,068 - root - INFO - Found first valid date: 2023-05-26 00:00:00 at index 0
+2025-04-07 23:19:57,069 - root - INFO - Setting initial self.data for date: 2023-05-26 00:00:00
+2025-04-07 23:19:57,069 - root - INFO - Initial self.data shape: (10, 15)
+2025-04-07 23:19:57,070 - root - INFO - Initial state calculated.
+2025-04-07 23:19:57,070 - root - INFO - AlpacaStockTradingEnv initialized successfully (Manual Replication, starting day 0).
+2025-04-07 23:20:04,924 - root - INFO - Trial 13: Validation finished. Final Account Value: 83887.99
+2025-04-07 23:20:04,926 - root - INFO - --- Optuna Trial 13 Finished (Duration: 173.23s) ---
+2025-04-07 23:20:05,328 - root - INFO - 
+--- Starting Optuna Trial 14 ---
+2025-04-07 23:20:05,970 - root - INFO - Initializing AlpacaStockTradingEnv (Manual Replication)...
+2025-04-07 23:20:05,972 - root - INFO - Env using Transaction Cost: 0.100%, Slippage: 0.050%
+2025-04-07 23:20:05,982 - root - INFO - Searching for the first date with complete data for all tickers...
+2025-04-07 23:20:06,002 - root - INFO - Found first valid date: 2016-01-04 00:00:00 at index 0
+2025-04-07 23:20:06,004 - root - INFO - Setting initial self.data for date: 2016-01-04 00:00:00
+2025-04-07 23:20:06,010 - root - INFO - Initial self.data shape: (10, 15)
+2025-04-07 23:20:06,018 - root - INFO - Initial state calculated.
+2025-04-07 23:20:06,020 - root - INFO - AlpacaStockTradingEnv initialized successfully (Manual Replication, starting day 0).
+2025-04-07 23:20:06,150 - root - INFO - Trial 14: Using custom TensorboardCallback with log_dir: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/results/tuning/tensorboard_logs/ppo-tuning-1D-1744080357/trial_14
+2025-04-07 23:23:11,275 - root - INFO - Trial 14: Training finished.
+2025-04-07 23:23:11,275 - root - INFO - Initializing AlpacaStockTradingEnv (Manual Replication)...
+2025-04-07 23:23:11,275 - root - INFO - Env using Transaction Cost: 0.100%, Slippage: 0.050%
+2025-04-07 23:23:11,276 - root - INFO - Searching for the first date with complete data for all tickers...
+2025-04-07 23:23:11,278 - root - INFO - Found first valid date: 2023-05-26 00:00:00 at index 0
+2025-04-07 23:23:11,278 - root - INFO - Setting initial self.data for date: 2023-05-26 00:00:00
+2025-04-07 23:23:11,279 - root - INFO - Initial self.data shape: (10, 15)
+2025-04-07 23:23:11,280 - root - INFO - Initial state calculated.
+2025-04-07 23:23:11,280 - root - INFO - AlpacaStockTradingEnv initialized successfully (Manual Replication, starting day 0).
+2025-04-07 23:23:12,136 - root - INFO - Trial 14: Validation finished. Final Account Value: 100370.51
+2025-04-07 23:23:12,136 - root - INFO - --- Optuna Trial 14 Finished (Duration: 186.81s) ---
+2025-04-07 23:23:12,176 - root - INFO - 
+--- Starting Optuna Trial 15 ---
+2025-04-07 23:23:12,241 - root - INFO - Initializing AlpacaStockTradingEnv (Manual Replication)...
+2025-04-07 23:23:12,241 - root - INFO - Env using Transaction Cost: 0.100%, Slippage: 0.050%
+2025-04-07 23:23:12,242 - root - INFO - Searching for the first date with complete data for all tickers...
+2025-04-07 23:23:12,243 - root - INFO - Found first valid date: 2016-01-04 00:00:00 at index 0
+2025-04-07 23:23:12,244 - root - INFO - Setting initial self.data for date: 2016-01-04 00:00:00
+2025-04-07 23:23:12,244 - root - INFO - Initial self.data shape: (10, 15)
+2025-04-07 23:23:12,245 - root - INFO - Initial state calculated.
+2025-04-07 23:23:12,245 - root - INFO - AlpacaStockTradingEnv initialized successfully (Manual Replication, starting day 0).
+2025-04-07 23:23:12,253 - root - INFO - Trial 15: Using custom TensorboardCallback with log_dir: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/results/tuning/tensorboard_logs/ppo-tuning-1D-1744080357/trial_15
+2025-04-07 23:25:39,437 - root - INFO - Trial 15: Training finished.
+2025-04-07 23:25:39,437 - root - INFO - Initializing AlpacaStockTradingEnv (Manual Replication)...
+2025-04-07 23:25:39,437 - root - INFO - Env using Transaction Cost: 0.100%, Slippage: 0.050%
+2025-04-07 23:25:39,439 - root - INFO - Searching for the first date with complete data for all tickers...
+2025-04-07 23:25:39,440 - root - INFO - Found first valid date: 2023-05-26 00:00:00 at index 0
+2025-04-07 23:25:39,440 - root - INFO - Setting initial self.data for date: 2023-05-26 00:00:00
+2025-04-07 23:25:39,441 - root - INFO - Initial self.data shape: (10, 15)
+2025-04-07 23:25:39,442 - root - INFO - Initial state calculated.
+2025-04-07 23:25:39,442 - root - INFO - AlpacaStockTradingEnv initialized successfully (Manual Replication, starting day 0).
+2025-04-07 23:25:40,348 - root - INFO - Trial 15: Validation finished. Final Account Value: 64604.87
+2025-04-07 23:25:40,348 - root - INFO - --- Optuna Trial 15 Finished (Duration: 148.17s) ---
+2025-04-07 23:25:40,386 - root - INFO - 
+--- Starting Optuna Trial 16 ---
+2025-04-07 23:25:40,444 - root - INFO - Initializing AlpacaStockTradingEnv (Manual Replication)...
+2025-04-07 23:25:40,444 - root - INFO - Env using Transaction Cost: 0.100%, Slippage: 0.050%
+2025-04-07 23:25:40,444 - root - INFO - Searching for the first date with complete data for all tickers...
+2025-04-07 23:25:40,446 - root - INFO - Found first valid date: 2016-01-04 00:00:00 at index 0
+2025-04-07 23:25:40,446 - root - INFO - Setting initial self.data for date: 2016-01-04 00:00:00
+2025-04-07 23:25:40,446 - root - INFO - Initial self.data shape: (10, 15)
+2025-04-07 23:25:40,447 - root - INFO - Initial state calculated.
+2025-04-07 23:25:40,447 - root - INFO - AlpacaStockTradingEnv initialized successfully (Manual Replication, starting day 0).
+2025-04-07 23:25:40,455 - root - INFO - Trial 16: Using custom TensorboardCallback with log_dir: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/results/tuning/tensorboard_logs/ppo-tuning-1D-1744080357/trial_16
