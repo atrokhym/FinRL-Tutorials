@@ -11,9 +11,11 @@ env.bak/
 venv.bak/
 
 # Data & Results (optional, depends if you want to commit them)
-# data/
-# results/
-# logs/
+data/
+results/
+logs/
+nohup.out
+
 
 # IDE specific
 .vscode/

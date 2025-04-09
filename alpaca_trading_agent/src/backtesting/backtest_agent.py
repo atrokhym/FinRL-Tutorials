@@ -1,35 +1,40 @@
 # alpaca_trading_agent/src/backtesting/backtest_agent.py
-
-import pandas as pd
-import numpy as np
 import os
-import argparse  # Added for command-line arguments
-import logging
-from stable_baselines3 import PPO
+import sys
 
-# from stable_baselines3.common.vec_env import DummyVecEnv # Not used directly here
-import pyfolio
-from alpaca_trading_agent.config import settings as config
-from finrl.plot import backtest_stats, backtest_plot, get_daily_return
-import matplotlib.pyplot as plt  # Import matplotlib
-import sys  # Added sys
-
-# --- Configuration and Environment Loading ---
+# --- Add project root to sys.path BEFORE other imports ---
+# This ensures that 'alpaca_trading_agent' can be found
 PROJECT_ROOT = os.path.dirname(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 )
+sys.path.insert(0, os.path.dirname(PROJECT_ROOT)) # Add parent directory (/app/workspaces/FinRL-Tutorials)
+sys.path.insert(0, PROJECT_ROOT) # Add the project root itself (/app/workspaces/FinRL-Tutorials/alpaca_trading_agent)
+
+# --- Now proceed with other imports ---
+import pandas as pd
+import numpy as np
+import argparse  # Added for command-line arguments
+import logging
+from stable_baselines3 import PPO
+import pyfolio
+from alpaca_trading_agent.config import settings as config # This should work now
+from finrl.plot import backtest_stats, backtest_plot, get_daily_return
+import matplotlib.pyplot as plt
+
+# --- Configuration and Path Setup (Simplified as PROJECT_ROOT is defined above) ---
+# PROJECT_ROOT is already defined
 CONFIG_DIR = os.path.join(PROJECT_ROOT, "config")
 DATA_DIR = os.path.join(PROJECT_ROOT, "data")
 RESULTS_DIR = os.path.join(PROJECT_ROOT, "results")
 SRC_DIR = os.path.join(PROJECT_ROOT, "src")
 
-# Add relevant directories to sys.path
-# import sys # Already imported above
-sys.path.insert(0, CONFIG_DIR)
-sys.path.insert(0, os.path.join(SRC_DIR, "environment"))  # To import trading_env
-sys.path.insert(0, SRC_DIR)  # Add src directory itself for utils
-# import settings # Import settings after adding config dir to path
-# No need to import settings here, it's done within the function after logging setup
+# Note: We added PROJECT_ROOT to sys.path earlier, which covers submodules in 'src' etc.
+# Explicitly adding CONFIG_DIR, SRC_DIR etc. might be redundant now but can be kept for clarity
+# or removed if preferred. Let's keep them for now.
+sys.path.insert(0, CONFIG_DIR) # Keep for direct 'import settings' later if needed
+sys.path.insert(0, os.path.join(SRC_DIR, "environment")) # Keep for 'from trading_env import ...'
+sys.path.insert(0, SRC_DIR) # Keep for 'from utils.logging_setup import ...'
+
 # --- Argument Parsing ---
 parser = argparse.ArgumentParser(
     description="Run backtesting for the Alpaca Trading Agent."
@@ -40,14 +45,15 @@ parser.add_argument(
     default="INFO",
     help="Set the logging level (e.g., DEBUG, INFO, WARNING, ERROR, CRITICAL)",
 )
-args = parser.parse_args()
+# args = parser.parse_args() # This is redefined below, removing duplicate
 
 # Logging setup will be done explicitly using the shared utility
+# Moved the import here as 'utils' should be findable via SRC_DIR in sys.path
 from utils.logging_setup import configure_file_logging
 
 # --- Load Configuration Settings ---
-# Moved settings import after path setup and logging setup
-# import settings # Already imported above
+# The 'from alpaca_trading_agent.config import settings as config' at the top should handle this.
+# We rely on that import now.
 
 
 parser = argparse.ArgumentParser(description="Alpaca Trading Agent Backtester")
@@ -433,20 +439,36 @@ try:
         "Skipping backtest_plot due to dependency version conflicts (pyfolio/pandas/numpy)."
     )
 
-    # Using FinRL's backtest_stats to print stats (expects df with date column)
-    stats_str = backtest_stats(
-        account_value=account_value_df_for_finrl, value_col_name="account_value"
-    )
-    print("\n--- Backtesting Performance Stats ---")
-    print(stats_str)
-    # Save stats using potentially suffixed name
-    stats_filename = (
-        f"{MODEL_FILENAME_BASE}_backtest_stats.txt"  # Base already includes suffix
-    )
-    stats_path = os.path.join(BACKTEST_RESULTS_DIR, stats_filename)
-    with open(stats_path, "w") as f:
-        f.write(stats_str.to_string())  # Convert Series to string before writing
-    logging.info(f"Backtest stats saved to {stats_path}")
+    # --- Calculate and Save Stats (with detailed logging) ---
+    stats_str = None # Initialize
+    try:
+        logging.info("Attempting to calculate backtest statistics using finrl.plot.backtest_stats...")
+        stats_str = backtest_stats(
+            account_value=account_value_df_for_finrl, value_col_name="account_value"
+        )
+        logging.info("Successfully calculated backtest statistics.")
+        print("\n--- Backtesting Performance Stats ---")
+        print(stats_str)
+    except Exception as e_stats:
+        logging.error(f"ERROR calculating backtest_stats: {e_stats}", exc_info=True)
+        # Do not proceed to save if calculation failed
+
+    if stats_str is not None:
+        try:
+            logging.info("Attempting to save backtest statistics to file...")
+            stats_filename = (
+                f"{MODEL_FILENAME_BASE}_backtest_stats.txt"  # Base already includes suffix
+            )
+            stats_path = os.path.join(BACKTEST_RESULTS_DIR, stats_filename)
+            with open(stats_path, "w") as f:
+                f.write(stats_str.to_string())  # Convert Series to string before writing
+            logging.info(f"Successfully saved backtest stats to {stats_path}")
+        except Exception as e_save:
+            logging.error(f"ERROR saving backtest stats to file {stats_path}: {e_save}", exc_info=True)
+    else:
+        logging.warning("Skipping saving stats file because stats calculation failed.")
+    # --- End Calculate and Save Stats ---
+
 
     # Optional: Try generating full pyfolio report if possible (might need adjustments)
     # import matplotlib.pyplot as plt
