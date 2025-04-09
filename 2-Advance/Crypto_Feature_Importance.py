@@ -141,7 +141,7 @@ def add_technical_indicator(df, tech_indicator_list):
             tic_df["high"], tic_df["low"], tic_df["close"], timeperiod=14
         )
         tic_df["dx"] = DX(tic_df["high"], tic_df["low"], tic_df["close"], timeperiod=14)
-        final_df = final_df.append(tic_df)
+        final_df = final_df._append(tic_df)
     return final_df
 
 
@@ -202,7 +202,7 @@ def get_barriers(
         ],
         index=daily_volatility.index,
     )
-    for day, vol in daily_volatility.iteritems():
+    for day, vol in daily_volatility.items():
         days_passed = len(daily_volatility.loc[daily_volatility.index[0] : day])
         # set the vertical barrier
         if days_passed + t_final < len(daily_volatility.index) and t_final != 0:
@@ -280,12 +280,16 @@ def get_labels():
             # price_initial = barriers.price[start]
             # price_final = barriers.price[end]
             # assign the top and bottom barriers
-            top_barrier = barriers.top_barrier[i]
-            bottom_barrier = barriers.bottom_barrier[i]
+            top_val = barriers.top_barrier[i]
+            bottom_val = barriers.bottom_barrier[i]
+            top_barrier = top_val if np.isscalar(top_val) else (top_val.iloc[0] if not top_val.empty else np.nan)
+            bottom_barrier = bottom_val if np.isscalar(bottom_val) else (bottom_val.iloc[0] if not bottom_val.empty else np.nan)
 
             # set the profit taking and stop loss conditons
-            condition_pt = (barriers.price[start:end] >= top_barrier).any()
-            condition_sl = (barriers.price[start:end] <= bottom_barrier).any()
+            idx = data_ohlcv.index.slice_indexer(start, end)
+            slice_close = data_ohlcv['close'].iloc[idx]
+            condition_pt = (slice_close >= top_barrier).any()
+            condition_sl = (slice_close <= bottom_barrier).any()
 
             # assign the labels
             if condition_pt:

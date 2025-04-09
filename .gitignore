@@ -1,3 +1,14 @@
 .ipynb_checkpoints
 /.ipynb_checkpoints/
 *.ipynb_checkpoints*
+
+# FinRL Online Learning generated files
+finrl_online_learning/data/
+finrl_online_learning/models/
+finrl_online_learning/tensorboard/
+alpaca_trading_agent/results/
+alpaca_trading_agent/data/
+alpaca_trading_agent/logs/
+alpaca_trading_agent/nohup.out
+.aider*
+.env
