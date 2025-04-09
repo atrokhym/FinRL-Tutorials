@@ -1,16 +1,16 @@
 {
-    "learning_rate": 1.8535913268689556e-05,
+    "learning_rate": 0.00044384062631337034,
     "n_steps": 1024,
-    "batch_size": 256,
-    "gamma": 0.907298555871534,
-    "ent_coef": 0.0026785707119293847,
+    "batch_size": 32,
+    "gamma": 0.9559018060771869,
+    "ent_coef": 0.07016271119953695,
     "clip_range": 0.1,
-    "gae_lambda": 0.9863082148168966,
-    "max_grad_norm": 0.9298224319544941,
-    "net_arch": "small",
-    "_study_name": "ppo-tuning-1D-1744138448",
+    "gae_lambda": 0.9031516126400695,
+    "max_grad_norm": 0.8719699580164543,
+    "net_arch": "medium",
+    "_study_name": "ppo-tuning-1D-1744153627",
     "_window_train_start": null,
     "_window_train_end": null,
     "_best_trial_number": 0,
-    "_best_value": -7.95458407468414
+    "_best_value": 17747.265743179323
 }

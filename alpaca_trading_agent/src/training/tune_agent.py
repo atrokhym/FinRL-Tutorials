@@ -244,94 +244,106 @@ def objective(trial: optuna.Trial) -> float:
         if "env_train_trial" in locals():
             env_train_trial.close()
 
-    # 5. Evaluate Agent on Validation Set (New Approach: Mean Reward over multiple episodes)
-    mean_reward = -np.inf # Default to worst possible value
+    # # 5.2 Evaluate Agent on Validation Set (New Approach: Mean Reward over multiple episodes)
+    # mean_reward = -np.inf # Default to worst possible value
+    # try:
+    #     env_validation = create_env(validation_df)  # Create single instance for eval
+    #     episode_rewards = []
+    #     logging.info(f"Trial {trial.number}: Starting validation over {EVAL_EPISODES} episodes...")
+
+    #     for i in range(EVAL_EPISODES):
+    #         obs, info = env_validation.reset()
+    #         terminated = False
+    #         truncated = False
+    #         episode_reward = 0.0
+    #         while not (terminated or truncated):
+    #             # Use deterministic=True for consistent evaluation
+    #             action, _states = model.predict(obs, deterministic=True)
+    #             obs, reward, terminated, truncated, info = env_validation.step(action)
+    #             episode_reward += reward
+    #         episode_rewards.append(episode_reward)
+    #         logging.debug(f"Trial {trial.number} Eval Episode {i+1}/{EVAL_EPISODES} finished. Reward: {episode_reward:.4f}")
+
+    #     mean_reward = np.mean(episode_rewards) if episode_rewards else -np.inf
+    #     logging.info(
+    #         f"Trial {trial.number}: Validation finished. Mean Reward over {EVAL_EPISODES} episodes: {mean_reward:.4f}"
+    #     )
+
+    # except Exception as e:
+    #     logging.exception(
+    #         f"Trial {trial.number}: Error during validation."
+    #     )  # Use logging.exception
+    #     # mean_reward remains -np.inf
+    # finally:
+    #     # Ensure validation env is closed
+    #     if "env_validation" in locals() and hasattr(env_validation, "close"):
+    #         env_validation.close()
+
+    # trial_duration = time.time() - trial_start_time
+    # logging.info(
+    #     f"--- Optuna Trial {trial.number} Finished (Duration: {trial_duration:.2f}s) ---"
+    # )
+
+    # # 6. Return Metric (Mean reward over validation episodes)
+    # # Handle cases where validation might result in NaN or Inf
+    # if np.isnan(mean_reward) or np.isinf(mean_reward):
+    #     return -np.inf # Return worst value if calculation failed
+
+    # return mean_reward
+
+    # 5.1 Evaluate Agent on Validation Set (Old Approach: Final Account Value in one episode)
     try:
         env_validation = create_env(validation_df)  # Create single instance for eval
-        episode_rewards = []
-        logging.info(f"Trial {trial.number}: Starting validation over {EVAL_EPISODES} episodes...")
-
-        for i in range(EVAL_EPISODES):
-            obs, info = env_validation.reset()
-            terminated = False
-            truncated = False
-            episode_reward = 0.0
-            while not (terminated or truncated):
-                # Use deterministic=True for consistent evaluation
-                action, _states = model.predict(obs, deterministic=True)
-                obs, reward, terminated, truncated, info = env_validation.step(action)
-                episode_reward += reward
-            episode_rewards.append(episode_reward)
-            logging.debug(f"Trial {trial.number} Eval Episode {i+1}/{EVAL_EPISODES} finished. Reward: {episode_reward:.4f}")
-
-        mean_reward = np.mean(episode_rewards) if episode_rewards else -np.inf
+        obs, info = env_validation.reset()
+        terminated = False
+        truncated = False
+        total_reward_validation = 0.0
+        account_value_validation = env_validation.initial_amount
+    
+        while not (terminated or truncated):
+            action, _states = model.predict(obs, deterministic=True)
+            obs, reward, terminated, truncated, info = env_validation.step(action)
+            total_reward_validation += reward
+            if terminated or truncated:
+                # Get final account value from the environment's memory
+                if (
+                    hasattr(env_validation, "asset_memory")
+                    and env_validation.asset_memory
+                ):
+                    account_value_validation = env_validation.asset_memory[-1]
+                else:  # Fallback if asset_memory isn't available/reliable
+                    account_value_validation = info.get(
+                        "total_asset", env_validation.initial_amount
+                    )  # Use info if available
+                break
+    
         logging.info(
-            f"Trial {trial.number}: Validation finished. Mean Reward over {EVAL_EPISODES} episodes: {mean_reward:.4f}"
+            f"Trial {trial.number}: Validation finished. Final Account Value: {account_value_validation:.2f}"
         )
-
+    
     except Exception as e:
         logging.exception(
             f"Trial {trial.number}: Error during validation."
         )  # Use logging.exception
-        # mean_reward remains -np.inf
+        return -np.inf  # Indicate failure
     finally:
-        # Ensure validation env is closed
+        # Ensure environments are closed (moved to outer finally)
+        # if "env_train_trial" in locals():
+        #     env_train_trial.close()
         if "env_validation" in locals() and hasattr(env_validation, "close"):
             env_validation.close()
-
-    # # 5. Evaluate Agent on Validation Set (Old Approach: Final Account Value in one episode)
-    # # try:
-    # #     env_validation = create_env(validation_df)  # Create single instance for eval
-    # #     obs, info = env_validation.reset()
-    # #     terminated = False
-    # #     truncated = False
-    # #     total_reward_validation = 0.0
-    # #     account_value_validation = env_validation.initial_amount
-    # #
-    # #     while not (terminated or truncated):
-    # #         action, _states = model.predict(obs, deterministic=True)
-    # #         obs, reward, terminated, truncated, info = env_validation.step(action)
-    # #         total_reward_validation += reward
-    # #         if terminated or truncated:
-    # #             # Get final account value from the environment's memory
-    # #             if (
-    # #                 hasattr(env_validation, "asset_memory")
-    # #                 and env_validation.asset_memory
-    # #             ):
-    # #                 account_value_validation = env_validation.asset_memory[-1]
-    # #             else:  # Fallback if asset_memory isn't available/reliable
-    # #                 account_value_validation = info.get(
-    # #                     "total_asset", env_validation.initial_amount
-    # #                 )  # Use info if available
-    # #             break
-    # #
-    # #     logging.info(
-    # #         f"Trial {trial.number}: Validation finished. Final Account Value: {account_value_validation:.2f}"
-    # #     )
-    # #
-    # # except Exception as e:
-    # #     logging.exception(
-    # #         f"Trial {trial.number}: Error during validation."
-    # #     )  # Use logging.exception
-    # #     return -np.inf  # Indicate failure
-    # # finally:
-    # #     # Ensure environments are closed (moved to outer finally)
-    # #     # if "env_train_trial" in locals():
-    # #     #     env_train_trial.close()
-    # #     if "env_validation" in locals() and hasattr(env_validation, "close"):
-    # #         env_validation.close()
 
     trial_duration = time.time() - trial_start_time
     logging.info(
         f"--- Optuna Trial {trial.number} Finished (Duration: {trial_duration:.2f}s) ---"
     )
 
-    # 6. Return Metric (Mean reward over validation episodes)
+    # 6. Return Metric (Final portfolio value on validation set)
     # Handle cases where validation might result in NaN or Inf
-    if np.isnan(mean_reward) or np.isinf(mean_reward):
-        return -np.inf # Return worst value if calculation failed
+    if np.isnan(account_value_validation) or np.isinf(account_value_validation):
+        return -np.inf
 
-    return mean_reward
+    return account_value_validation
 
 
 # --- Run Optuna Study ---
