@@ -217,11 +217,13 @@ if __name__ == "__main__":
         sys.exit(1)
 
     # --- Determine and Filter by End Date ---
-    end_date_to_use = args.train_end_date if args.train_end_date else settings.TRAIN_END_DATE
+    # Use the latest date needed (Test End Date) by default for filtering raw data
+    # before preprocessing, unless overridden by command line.
+    end_date_to_use = args.train_end_date if args.train_end_date else settings.TEST_END_DATE
     if args.train_end_date:
-        logging.info(f"Using command-line end date for filtering: {end_date_to_use}")
+        logging.info(f"Using command-line override end date for filtering: {end_date_to_use}")
     else:
-        logging.info(f"Using end date from settings for filtering: {end_date_to_use}")
+        logging.info(f"Using latest required end date from settings (TEST_END_DATE) for filtering: {end_date_to_use}")
 
     try:
         # Convert end_date_to_use to Timestamp for comparison (handle potential errors)

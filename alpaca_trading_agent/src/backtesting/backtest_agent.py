@@ -15,6 +15,8 @@ import pandas as pd
 import numpy as np
 import argparse  # Added for command-line arguments
 import logging
+import random # Added for seeding
+import torch # Added for seeding
 from stable_baselines3 import PPO
 import pyfolio
 from alpaca_trading_agent.config import settings as config # This should work now
@@ -67,6 +69,21 @@ args = parser.parse_args()
 # --- Configure Logging for this script ---
 configure_file_logging(args.log_level) # Ensure file logging is configured
 # Note: Console logging is not added here by default.
+
+# --- Seed for Reproducibility ---
+SEED = 42  # Or load from settings.py if preferred
+random.seed(SEED)
+np.random.seed(SEED)
+torch.manual_seed(SEED)
+if torch.cuda.is_available():
+    torch.cuda.manual_seed(SEED)
+    torch.cuda.manual_seed_all(SEED)
+    # Optional: Enforce determinism (might impact performance)
+    # torch.backends.cudnn.deterministic = True
+    # torch.backends.cudnn.benchmark = False
+logging.info(f"Global random seeds set to: {SEED}")
+# --- End Seeding ---
+
 # --- Load Settings and Environment ---
 try:
     import settings
@@ -98,7 +115,7 @@ MODEL_PATH = os.path.join(
 )  # Use suffixed base
 
 # --- Load Processed Test Data (and filter for Walk-Forward) ---
-full_processed_filename = "full_processed_combined.csv"
+full_processed_filename = "processed_data.csv" # Use the standard processed data filename
 full_processed_filepath = os.path.join(DATA_DIR, full_processed_filename)
 
 # Check for Walk-Forward override environment variables

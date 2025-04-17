@@ -87,7 +87,7 @@ def fetch_historical_data(tickers, start_date, end_date, timeframe='1Day', limit
                 timeframe,
                 start=start_dt,
                 end=end_dt,
-                adjustment='raw', # or 'split', 'dividend', 'all'
+                adjustment='all', # Use 'all' for split and dividend adjustments
                 limit=limit # Fetch maximum allowed bars per request
                 # Note: For longer periods, pagination might be needed if limit is exceeded.
                 # The alpaca-py library handles pagination automatically for get_bars.
@@ -150,18 +150,20 @@ if __name__ == "__main__":
 
     logging.info(f"--- Starting Data Fetching Script (PID: {os.getpid()}) ---")
 
-    # Determine the end date to use
-    end_date_to_use = args.train_end_date if args.train_end_date else settings.TRAIN_END_DATE
+    # Determine the end date to use - Fetch up to the latest date needed (Test End Date)
+    # The command-line override might still be useful for specific shorter fetches,
+    # but default should cover train, validation, and test periods.
+    end_date_to_use = args.train_end_date if args.train_end_date else settings.TEST_END_DATE
     if args.train_end_date:
-        logging.info(f"Using command-line end date: {end_date_to_use}")
+        logging.info(f"Using command-line override end date: {end_date_to_use}")
     else:
-        logging.info(f"Using end date from settings: {end_date_to_use}")
+        logging.info(f"Using latest required end date from settings (TEST_END_DATE): {end_date_to_use}")
 
     # Fetch data up to the determined end date
     raw_data = fetch_historical_data(
         tickers=settings.TICKERS,
         start_date=settings.TRAIN_START_DATE, # Start date is still from settings
-        end_date=end_date_to_use,
+        end_date=end_date_to_use, # Fetch up to the determined end date
         timeframe=settings.TIME_INTERVAL
     )
 

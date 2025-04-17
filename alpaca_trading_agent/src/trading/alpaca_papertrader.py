@@ -10,6 +10,7 @@ import time
 from datetime import datetime, timedelta
 import pytz # Import pytz for timezone handling
 import schedule # For scheduling the trading logic
+import math # For floor function
 # Note: argparse is imported later after potentially configuring logging
 from stable_baselines3 import PPO
 
@@ -74,6 +75,7 @@ def connect_alpaca():
         )
         account = api.get_account()
         logging.info(f"Connected successfully. Account Status: {account.status}")
+        logging.info(f"Account Number: {account.account_number}") # Added line to log account number
         if settings.ALPACA_API_BASE_URL != 'https://paper-api.alpaca.markets':
              logging.warning("Connected to LIVE Alpaca API. Ensure this is intended.")
         return api
@@ -173,9 +175,12 @@ def run_trading_logic(api, model):
     try:
         account = api.get_account()
         cash_balance = float(account.cash)
+        portfolio_value = float(account.portfolio_value)
+        buying_power = float(account.buying_power)
+        logging.info(f"Account Status - Portfolio Value: {portfolio_value:.2f}, Cash: {cash_balance:.2f}, Buying Power: {buying_power:.2f}")
         positions = api.list_positions()
         holdings = {pos.symbol: int(pos.qty) for pos in positions}
-        logging.info(f"Current Cash: {cash_balance:.2f}, Holdings: {holdings}")
+        logging.info(f"Current Holdings: {holdings}")
     except Exception as e:
         logging.error(f"Failed to get account/position info: {e}", exc_info=True)
         return
@@ -217,30 +222,87 @@ def run_trading_logic(api, model):
     # 5. Translate Action to Orders
     actions_scaled = action * settings.MAX_STOCK_POSITION
     actions_intended_shares = actions_scaled.astype(int)
-    orders_to_submit = []
+    # orders_to_submit = [] # Replaced by logic below
 
     try:
         latest_quotes = api.get_latest_quotes(settings.TICKERS)
-        current_prices = {tic: q.ap for tic, q in latest_quotes.items()}
+        # Use ask price (ap) for buy cost estimate, bid price (bp) for sell value estimate (though not strictly needed for market sell)
+        current_ask_prices = {tic: q.ap for tic, q in latest_quotes.items()}
     except Exception as e:
-        logging.warning(f"Could not get latest quotes: {e}")
-        current_prices = {}
+        logging.warning(f"Could not get latest quotes: {e}. Will attempt fallback using latest close price for estimates.")
+        current_ask_prices = {} # Initialize empty, will populate with fallbacks later
 
     logging.info("Calculating desired trades based on action...")
+    # Use latest close prices from state df as a fallback if quotes are missing
+    latest_close_prices = latest_state_df.set_index('tic')['close'].to_dict()
+
+    # Separate buys and sells intentions
+    buy_order_requests = [] # Store as {'symbol': tic, 'qty': qty, 'price_est': price}
+    sell_order_requests = [] # Store as {'symbol': tic, 'qty': qty}
+
     for i, tic in enumerate(settings.TICKERS):
         intended_change = actions_intended_shares[i]
         current_holding = holdings.get(tic, 0)
-        current_price_estimate = current_prices.get(tic, "N/A")
 
-        if intended_change > 0: # Buy
+        # Get price estimate for buys: prefer latest ask, fallback to latest close
+        price_estimate = current_ask_prices.get(tic)
+        if price_estimate is None:
+            price_estimate = latest_close_prices.get(tic)
+            if price_estimate:
+                 logging.debug(f"Using latest close price ({price_estimate:.2f}) as buy estimate for {tic} (quote unavailable).")
+            else:
+                 logging.warning(f"Could not get price estimate for {tic}. Skipping trade check for this ticker.")
+                 continue # Skip if no price available
+
+        if intended_change > 0: # Intend to Buy
             qty_to_buy = intended_change
-            logging.info(f"ORDER PREP: Buy {qty_to_buy} {tic} @ market (Holding: {current_holding}, Est Price: {current_price_estimate})")
-            orders_to_submit.append({"symbol": tic, "qty": int(qty_to_buy), "side": "buy", "type": "market", "time_in_force": "day"})
-        elif intended_change < 0: # Sell
-            qty_to_sell = min(abs(intended_change), current_holding)
+            logging.info(f"TRADE PREP (Buy Intention): {qty_to_buy} {tic} @ market (Holding: {current_holding}, Est Price: {price_estimate:.2f})")
+            # Ensure price_estimate is a float before adding
+            if isinstance(price_estimate, (int, float)):
+                buy_order_requests.append({"symbol": tic, "qty": qty_to_buy, "price_est": float(price_estimate)})
+            else:
+                logging.warning(f"Invalid price estimate type ({type(price_estimate)}) for {tic}. Skipping buy intention.")
+
+
+        elif intended_change < 0: # Intend to Sell
+            qty_to_sell = min(abs(intended_change), current_holding) # Can only sell what you have
             if qty_to_sell > 0:
-                logging.info(f"ORDER PREP: Sell {qty_to_sell} {tic} @ market (Holding: {current_holding}, Est Price: {current_price_estimate})")
-                orders_to_submit.append({"symbol": tic, "qty": int(qty_to_sell), "side": "sell", "type": "market", "time_in_force": "day"})
+                logging.info(f"TRADE PREP (Sell): {qty_to_sell} {tic} @ market (Holding: {current_holding})")
+                sell_order_requests.append({"symbol": tic, "qty": int(qty_to_sell)}) # Ensure int qty
+
+    # --- Buying Power Check and Buy Order Preparation ---
+    total_buy_cost = sum(req['qty'] * req['price_est'] for req in buy_order_requests)
+    logging.info(f"Estimated total cost for buy intentions: {total_buy_cost:.2f}. Available cash: {cash_balance:.2f}")
+
+    # Scale down buy orders if necessary (use 99% of cash for safety margin)
+    cash_limit_for_buys = cash_balance * 0.99
+    final_buy_orders = []
+    if total_buy_cost > cash_limit_for_buys and total_buy_cost > 0:
+        scale_factor = cash_limit_for_buys / total_buy_cost
+        logging.warning(f"Insufficient buying power ({cash_balance:.2f}) for estimated buy cost ({total_buy_cost:.2f}). Scaling buy orders by factor {scale_factor:.4f}.")
+        for req in buy_order_requests:
+            scaled_qty = math.floor(req['qty'] * scale_factor) # Use floor to ensure integer qty <= available cash
+            if scaled_qty > 0:
+                logging.info(f"SCALED BUY ORDER: {scaled_qty} {req['symbol']} (Original: {req['qty']})")
+                final_buy_orders.append({"symbol": req['symbol'], "qty": int(scaled_qty), "side": "buy", "type": "market", "time_in_force": "day"})
+            else:
+                 logging.info(f"Skipping buy for {req['symbol']} after scaling resulted in zero quantity.")
+    else:
+        # No scaling needed, prepare original buy orders
+        logging.info("Sufficient buying power for all intended buy orders.")
+        for req in buy_order_requests:
+             final_buy_orders.append({"symbol": req['symbol'], "qty": int(req['qty']), "side": "buy", "type": "market", "time_in_force": "day"})
+
+
+    # --- Prepare final sell orders ---
+    final_sell_orders = [
+        {"symbol": req['symbol'], "qty": req['qty'], "side": "sell", "type": "market", "time_in_force": "day"}
+        for req in sell_order_requests
+    ]
+
+    # Combine sell and (potentially scaled) buy orders
+    # Consider submitting sells first to potentially free up cash, though market orders execute quickly
+    orders_to_submit = final_sell_orders + final_buy_orders
 
     # 6. Submit Orders
     if not orders_to_submit:

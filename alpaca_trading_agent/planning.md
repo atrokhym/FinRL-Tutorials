@@ -2,6 +2,11 @@
 
 This file tracks the planned improvements for the `alpaca_trading_agent` project.
 
+**Data Accuracy Improvement: Use Adjusted Historical Data - Completed**
+
+1.  **Modify Data Fetching:** Update `src/data_fetcher/fetch_data.py` to use `adjustment='all'` when calling Alpaca's `get_bars` method. This ensures historical data accounts for stock splits and dividends, providing a more accurate basis for training and backtesting. (Done)
+2.  **Re-run Pipeline:** Re-fetch data and re-run preprocessing, training, and backtesting steps. (Required after code change)
+
 **Phase 1: Hyperparameter Tuning (Optuna) - Completed**
 
 1.  Add Dependency: `optuna` added to `requirements.txt`. (Done)

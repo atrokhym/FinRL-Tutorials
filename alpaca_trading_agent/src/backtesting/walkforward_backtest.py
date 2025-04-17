@@ -5,6 +5,9 @@ import sys
 import logging
 import argparse
 import pandas as pd
+import numpy as np # Added for seeding
+import random # Added for seeding
+import torch # Added for seeding
 from dateutil.relativedelta import relativedelta
 import subprocess
 import json
@@ -407,15 +410,30 @@ def perform_walk_forward():
 
 
 if __name__ == "__main__":
+    # --- Seed for Reproducibility ---
+    # Note: This seeds the main orchestration script. Subprocesses (tune, train, backtest)
+    # should have their own seeding logic for full reproducibility of their internal operations.
+    SEED = 42  # Or load from settings.py if preferred
+    random.seed(SEED)
+    np.random.seed(SEED)
+    torch.manual_seed(SEED)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(SEED)
+        torch.cuda.manual_seed_all(SEED)
+        # Optional: Enforce determinism (might impact performance)
+        # torch.backends.cudnn.deterministic = True
+        # torch.backends.cudnn.benchmark = False
+    logging.info(f"Global random seeds set for walkforward script: {SEED}")
+    # --- End Seeding ---
+
     # NOTE: This script assumes that the other scripts (tune, train, backtest)
-    # can be driven by environment variables WF_OVERRIDE_*_DATE and WF_MODEL_SUFFIX.
-    # Modifications might be needed in those scripts to read these env vars
-    # and apply them appropriately (e.g., override settings.py values, modify file save paths).
+    # can be driven by environment variables WF_OVERRIDE_*_DATE and WF_MODEL_SUFFIX,
+    # and that those scripts implement their own seeding.
     # Also, preprocess script must have been run to generate data covering the full WF period.
 
     logging.warning("Ensure preprocessing covers the full WF period.")
     logging.warning(
-        "Ensure tune/train/backtest scripts handle WF_* overrides and suffix."
+        "Ensure tune/train/backtest scripts handle WF_* overrides, suffix, and internal seeding."
     )
 
     perform_walk_forward()

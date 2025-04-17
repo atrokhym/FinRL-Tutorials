@@ -6,6 +6,8 @@ import os
 import logging
 import json # Added for loading params
 import argparse # Added for command-line arguments
+import random # Added for seeding
+import torch # Added for seeding
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv
 from stable_baselines3.common.logger import configure as sb3_configure_logger
@@ -58,6 +60,20 @@ def train_model(total_timesteps: int, model_suffix: str = "", log_level: str = "
     """
     # --- Configure Logging for this script ---
     configure_file_logging(log_level)
+
+    # --- Seed for Reproducibility ---
+    SEED = 42  # Or load from settings.py if preferred
+    random.seed(SEED)
+    np.random.seed(SEED)
+    torch.manual_seed(SEED)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(SEED)
+        torch.cuda.manual_seed_all(SEED)
+        # Optional: Enforce determinism (might impact performance)
+        # torch.backends.cudnn.deterministic = True
+        # torch.backends.cudnn.benchmark = False
+    logging.info(f"Global random seeds set to: {SEED}")
+    # --- End Seeding ---
 
     logging.info("--- Starting Training Script ---")
     logging.info(f"Total Timesteps: {total_timesteps}")
@@ -179,7 +195,7 @@ def train_model(total_timesteps: int, model_suffix: str = "", log_level: str = "
         "vf_coef": 0.5,
         "max_grad_norm": 0.5,
         "verbose": 1,
-        "seed": 42,
+        "seed": SEED, # Use the defined SEED
         "device": "auto",
         "tensorboard_log": log_path, # Use the SB3 log path for TensorBoard
         "policy_kwargs": policy_kwargs

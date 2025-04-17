@@ -19,3 +19,55 @@
 2025-04-09 13:49:50,012 - root - INFO - --- Step: Starting Paper Trading Agent ---
 2025-04-09 13:49:50,012 - root - INFO - Executing script: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/src/trading/alpaca_papertrader.py with log level DEBUG
 2025-04-09 13:49:50,012 - root - DEBUG - Running command: /home/andrew/miniforge3/envs/finrl/bin/python /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/src/trading/alpaca_papertrader.py --log-level DEBUG
+2025-04-10 13:13:15,219 - root - INFO - --- Console Logging Added (Level: DEBUG) ---
+2025-04-10 13:13:15,220 - root - INFO - --- Main Orchestrator Logging Initialized (Level: DEBUG) ---
+2025-04-10 13:13:15,220 - root - INFO - Console logging enabled: True
+2025-04-10 13:13:15,220 - root - INFO - --- Running in mode: papertrade ---
+2025-04-10 13:13:15,220 - root - INFO - --- Step: Starting Paper Trading Agent ---
+2025-04-10 13:13:15,220 - root - INFO - Executing script: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/src/trading/alpaca_papertrader.py with log level DEBUG
+2025-04-10 13:13:15,220 - root - DEBUG - Running command: /home/andrew/miniforge3/envs/finrl/bin/python /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/src/trading/alpaca_papertrader.py --log-level DEBUG
+/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/stable_baselines3/common/save_util.py:167: UserWarning: Could not deserialize object _last_obs. Consider using `custom_objects` argument to replace this object.
+Exception: module 'numpy.core.multiarray' has no attribute 'floating'
+  warnings.warn(
+/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/stable_baselines3/common/save_util.py:167: UserWarning: Could not deserialize object _last_episode_starts. Consider using `custom_objects` argument to replace this object.
+Exception: module 'numpy.core.multiarray' has no attribute 'floating'
+  warnings.warn(
+/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/stable_baselines3/common/save_util.py:167: UserWarning: Could not deserialize object observation_space. Consider using `custom_objects` argument to replace this object.
+Exception: module 'numpy.core.multiarray' has no attribute 'floating'
+  warnings.warn(
+/home/andrew/miniforge3/envs/finrl/lib/python3.11/site-packages/stable_baselines3/common/save_util.py:167: UserWarning: Could not deserialize object action_space. Consider using `custom_objects` argument to replace this object.
+Exception: module 'numpy.core.multiarray' has no attribute 'floating'
+  warnings.warn(
+2025-04-10 13:13:19,376 - root - ERROR - Error executing script /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/src/trading/alpaca_papertrader.py:
+2025-04-10 13:13:19,377 - root - ERROR - Return Code: 1
+2025-04-10 13:13:19,377 - root - ERROR - Failed to start paper trading agent.
+2025-04-10 13:13:19,377 - root - INFO - --- Mode 'papertrade' finished. ---
+2025-04-10 13:56:26,144 - root - INFO - --- Console Logging Added (Level: DEBUG) ---
+2025-04-10 13:56:26,145 - root - INFO - --- Main Orchestrator Logging Initialized (Level: DEBUG) ---
+2025-04-10 13:56:26,145 - root - INFO - Console logging enabled: True
+2025-04-10 13:56:26,145 - root - INFO - --- Running in mode: papertrade ---
+2025-04-10 13:56:26,145 - root - INFO - --- Step: Starting Paper Trading Agent ---
+2025-04-10 13:56:26,145 - root - INFO - Executing script: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/src/trading/alpaca_papertrader.py with log level DEBUG
+2025-04-10 13:56:26,145 - root - DEBUG - Running command: /home/andrew/miniforge3/envs/finrl/bin/python /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/src/trading/alpaca_papertrader.py --log-level DEBUG
+2025-04-15 19:41:54,361 - root - ERROR - Error executing script /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/src/trading/alpaca_papertrader.py:
+2025-04-15 19:41:54,387 - root - ERROR - Return Code: -9
+2025-04-15 19:41:54,389 - root - ERROR - Failed to start paper trading agent.
+2025-04-15 19:41:54,389 - root - INFO - --- Mode 'papertrade' finished. ---
+2025-04-16 00:24:03,938 - root - INFO - --- Console Logging Added (Level: DEBUG) ---
+2025-04-16 00:24:03,939 - root - INFO - --- Main Orchestrator Logging Initialized (Level: DEBUG) ---
+2025-04-16 00:24:03,939 - root - INFO - Console logging enabled: True
+2025-04-16 00:24:03,939 - root - INFO - --- Running in mode: papertrade ---
+2025-04-16 00:24:03,939 - root - INFO - --- Step: Starting Paper Trading Agent ---
+2025-04-16 00:24:03,939 - root - INFO - Executing script: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/src/trading/alpaca_papertrader.py with log level DEBUG
+2025-04-16 00:24:03,939 - root - DEBUG - Running command: /home/andrew/miniforge3/envs/finrl/bin/python /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/src/trading/alpaca_papertrader.py --log-level DEBUG
+2025-04-16 15:07:59,790 - root - INFO - --- Console Logging Added (Level: DEBUG) ---
+2025-04-16 15:07:59,791 - root - INFO - --- Main Orchestrator Logging Initialized (Level: DEBUG) ---
+2025-04-16 15:07:59,791 - root - INFO - Console logging enabled: True
+2025-04-16 15:07:59,791 - root - INFO - --- Running in mode: papertrade ---
+2025-04-16 15:07:59,791 - root - INFO - --- Step: Starting Paper Trading Agent ---
+2025-04-16 15:07:59,791 - root - INFO - Executing script: /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/src/trading/alpaca_papertrader.py with log level DEBUG
+2025-04-16 15:07:59,791 - root - DEBUG - Running command: /home/andrew/miniforge3/envs/finrl/bin/python /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/src/trading/alpaca_papertrader.py --log-level DEBUG
+2025-04-16 17:18:33,570 - root - ERROR - Error executing script /app/workspaces/FinRL-Tutorials/alpaca_trading_agent/src/trading/alpaca_papertrader.py:
+2025-04-16 17:18:33,572 - root - ERROR - Return Code: -9
+2025-04-16 17:18:33,573 - root - ERROR - Failed to start paper trading agent.
+2025-04-16 17:18:33,573 - root - INFO - --- Mode 'papertrade' finished. ---
