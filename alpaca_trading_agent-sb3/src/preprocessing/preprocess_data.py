@@ -13,7 +13,21 @@ SRC_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, SRC_DIR)
 
 # Logging setup will be done explicitly using the shared utility
-from utils.logging_setup import configure_file_logging
+try:
+    # Import both functions now
+    from utils.logging_setup import configure_file_logging, add_console_logging
+except ImportError:
+     # Fallback if the utility somehow isn't found
+    logging.basicConfig(
+        level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s"
+    )
+    logging.error(
+        "Failed to import logging setup functions from src.utils. Cannot configure logging."
+    )
+    # Define dummy functions to prevent NameErrors later if import fails
+    def configure_file_logging(level): pass
+    def add_console_logging(level): pass
+
 # --- Configuration Loading ---
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 CONFIG_DIR = os.path.join(PROJECT_ROOT, 'config')
@@ -55,28 +69,43 @@ def preprocess_data(df: pd.DataFrame, is_live_trading: bool = False) -> pd.DataF
     logging.info(f"Starting preprocessing. Initial shape: {df.shape}")
 
     # Convert index to datetime if it's not already (it should be from fetch_data)
-    if not isinstance(df.index, pd.DatetimeIndex):
+    # Handle potential 'date' column if index reset happened before calling
+    if 'date' in df.columns and not pd.api.types.is_datetime64_any_dtype(df['date']):
+         df['date'] = pd.to_datetime(df['date'])
+         df = df.set_index('date', drop=False) # Set date as index but keep column
+    elif not isinstance(df.index, pd.DatetimeIndex):
         df.index = pd.to_datetime(df.index)
+        df.index.name = 'date' # Name the index
+
 
     # Use StockDataFrame for indicator calculation
     # Ensure columns are named as expected by stockstats: open, high, low, close, volume
     # Our fetch_data script already lowercased them.
-    stock = Sdf.retype(df.copy())
+    try:
+        stock = Sdf.retype(df.copy())
+    except Exception as e:
+         logging.error(f"Failed to retype DataFrame for StockStats: {e}")
+         logging.error(f"Columns available: {df.columns.tolist()}")
+         return None
+
 
     # Use indicators defined in settings
     # State features: close, high, low, trade_count, open, volume, vwap
     # Technical indicators: macd, rsi_14, cci_14, boll_ub, boll_lb
-    indicators = settings.INDICATORS
+    indicators = settings.INDICATORS # Get base indicators list
 
-    # Filter out price/volume features that are already in the data
-    tech_indicators = [ind for ind in indicators if ind not in ['close', 'high', 'low', 'trade_count', 'open', 'volume', 'vwap']]
-    logging.info(f"Calculating indicators: {indicators}")
+    logging.info(f"Calculating base indicators: {indicators}")
 
+    # Calculate base indicators defined in settings.INDICATORS
     for indicator in indicators:
+        if indicator in df.columns: # Skip if already exists (e.g., price/volume)
+            continue
         try:
             indicator_data = stock[indicator]
             df[indicator] = indicator_data
             logging.debug(f"Calculated {indicator}")
+        except KeyError:
+            logging.warning(f"Stockstats indicator '{indicator}' not found or failed calculation.")
         except Exception as e:
             logging.warning(f"Could not calculate indicator '{indicator}': {e}")
 
@@ -84,32 +113,30 @@ def preprocess_data(df: pd.DataFrame, is_live_trading: bool = False) -> pd.DataF
     # Option 1: Forward fill (Handles NaNs from indicators at start)
     df.ffill(inplace=True)
     # Fill any remaining NaNs (e.g., if ffill couldn't fill from the start) with 0
-    df.fillna(0, inplace=True)
-    # Option 2: Backward fill (less common for time series)
-    # df.bfill(inplace=True)
-    # Option 3: Fill with 0 or mean (use cautiously)
-    # df.fillna(0, inplace=True)
-    # Option 4: Drop rows with any NaN (might lose valuable data)
-    # df.dropna(inplace=True) # Removed: Don't drop all rows with NaNs, we need the last row.
+    # df.fillna(0, inplace=True) # Delay filling remaining NaNs until after turbulence
 
-    # Ensure correct column naming and order for FinRL (often expects 'date' column)
-    # df = df.reset_index().rename(columns={'index': 'date'}) # Removed: 'date' column should already exist from fetch_latest_data
 
-    # --- Ensure 'date' column exists by resetting index ---
-    # This needs to happen regardless of live trading or not, before sorting.
-    original_index_name = df.index.name # Store original index name if it exists
-    df = df.reset_index() # Reset index, making it a column
-    # Rename the index column to 'date'. Common names are 'timestamp' or None (becomes 'index')
-    index_col_name = original_index_name if original_index_name else 'index' # Default name is 'index' if unnamed
-    if index_col_name in df.columns and 'date' not in df.columns:
-        df = df.rename(columns={index_col_name: 'date'})
-        logging.info(f"Renamed index column '{index_col_name}' to 'date'.")
-    elif 'date' not in df.columns:
-         # If rename didn't happen and 'date' still missing, log error
-         logging.error(f"Could not find or create 'date' column from index '{index_col_name}'. Columns: {df.columns.tolist()}")
+    # --- Ensure 'date' and 'tic' columns exist ---
+    if 'date' not in df.columns:
+        # If 'date' is the index name, reset it
+        if df.index.name == 'date':
+            df = df.reset_index()
+        else:
+             # Attempt to find a date-like column if index wasn't 'date'
+             date_col = next((col for col in df.columns if 'date' in col.lower()), None)
+             if date_col and not pd.api.types.is_datetime64_any_dtype(df[date_col]):
+                 df[date_col] = pd.to_datetime(df[date_col])
+                 df = df.rename(columns={date_col: 'date'})
+             elif not date_col:
+                 logging.error(f"Could not find or create 'date' column. Columns: {df.columns.tolist()}")
+                 return None
+
+    if 'tic' not in df.columns:
+         logging.error(f"'tic' column missing. Columns: {df.columns.tolist()}")
          return None
 
-    # --- Calculate Turbulence Index (After 'date' column exists) ---
+
+    # --- Calculate Turbulence Index ---
     try:
         # Calculate daily returns per tic (requires 'date' and 'tic' columns)
         df = df.sort_values(by=['tic', 'date']) # Sort for pct_change
@@ -122,7 +149,7 @@ def preprocess_data(df: pd.DataFrame, is_live_trading: bool = False) -> pd.DataF
         df.drop(columns=['daily_return'], inplace=True)
         logging.info(f"Calculated turbulence index (rolling {TURBULENCE_WINDOW}-day std dev).")
     except KeyError as e:
-         logging.error(f"KeyError during turbulence calculation (likely missing 'date' or 'tic'): {e}")
+         logging.error(f"KeyError during turbulence calculation (likely missing 'date', 'tic', or 'close'): {e}")
          return None
     except Exception as e:
          logging.error(f"Error during turbulence calculation: {e}", exc_info=True)
@@ -133,7 +160,7 @@ def preprocess_data(df: pd.DataFrame, is_live_trading: bool = False) -> pd.DataF
     # --- Handle NaNs from Turbulence and Fill Remaining ---
     # Forward fill again to propagate last valid turbulence value if needed
     df.ffill(inplace=True)
-    # Fill any remaining NaNs (e.g., at the very start of the series for indicators/turbulence) with 0
+    # Fill any remaining NaNs (e.g., at the very start of the series for indicators/turbulence/vix) with 0
     df.fillna(0, inplace=True)
 
 
@@ -141,39 +168,46 @@ def preprocess_data(df: pd.DataFrame, is_live_trading: bool = False) -> pd.DataF
     if is_live_trading:
         logging.info("Preprocessing for live trading: Selecting last row.")
         if not df.empty:
-            df = df.iloc[[-1]].reset_index(drop=True) # Select last row and reset its new index
+            df = df.sort_values(by=['date', 'tic']) # Ensure sorted before taking last
+            # Select the last entry for each ticker based on the latest date
+            df = df.loc[df.groupby('tic')['date'].idxmax()]
+            df = df.reset_index(drop=True) # Reset index after selection
         else:
-            # This case might be less likely now, but keep for safety
             logging.warning("DataFrame became empty before selecting last row.")
             return None
     else:
          logging.info("Preprocessing for training/backtesting: Using full timeseries.")
 
-    # Ensure 'tic' column exists
-    if 'tic' not in df.columns:
-        logging.error("Preprocessing error: 'tic' column missing.")
-        return None
-
     # Sort by date and ticker - crucial for FinRL environments
+    # This should happen *before* returning, even for live trading (though df is small then)
     if 'date' in df.columns and 'tic' in df.columns:
         df = df.sort_values(by=['date', 'tic']).reset_index(drop=True)
     else:
-        logging.error(f"Required columns ('date', 'tic') not found for sorting. Columns: {df.columns.tolist()}")
+        # This check might be redundant now but keep for safety
+        logging.error(f"Required columns ('date', 'tic') not found for final sorting. Columns: {df.columns.tolist()}")
         return None
 
     logging.info(f"Preprocessing finished. Final shape: {df.shape}")
     logging.info(f"Columns: {df.columns.tolist()}")
-    logging.info(f"Date range: {df['date'].min()} to {df['date'].max()}")
+
+    if not df.empty:
+        logging.info(f"Date range: {df['date'].min()} to {df['date'].max()}")
+    else:
+        logging.warning("Processed dataframe is empty.")
+
 
     # Check for any remaining NaN values
     if df.isnull().values.any():
         logging.warning("NaN values remain after preprocessing. Review handling.")
-        logging.warning(df[df.isnull().any(axis=1)])
+        logging.warning(f"Columns with NaN: {df.columns[df.isnull().any()].tolist()}")
+        # Log rows with NaN for inspection (limit output)
+        nan_rows = df[df.isnull().any(axis=1)]
+        logging.warning(f"Sample rows with NaN:\n{nan_rows.head().to_string()}")
+
 
     return df
 
-# Logging setup is handled by the calling script (main.py)
-# This script inherits the logger configuration.
+# Logging setup is handled by the calling script (main.py) or within __main__ here.
 # --- Main Execution ---
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Data Preprocessor for Alpaca Trading Agent")
@@ -187,15 +221,25 @@ if __name__ == "__main__":
         '--train-end-date',
         type=str,
         default=None,
-        help="Specify the end date for filtering data in YYYY-MM-DD format. Overrides settings.py TRAIN_END_DATE."
+        help="Specify the end date for filtering data in YYYY-MM-DD format. Overrides settings.py TEST_END_DATE."
     )
     args = parser.parse_args()
 
     # --- Configure Logging for this script ---
-    configure_file_logging(args.log_level)
-    # Note: Console logging is not added here by default.
-
-    logging.info(f"--- Starting Data Preprocessing Script (PID: {os.getpid()}) ---")
+    try:
+        configure_file_logging(args.log_level)
+        add_console_logging(args.log_level) # ADDED THIS CALL
+        logging.info(f"--- Data Preprocessing Logging Initialized (Level: {args.log_level.upper()}) ---")
+    except Exception as e:
+        # Use basic print if logging setup itself fails
+        print(f"ERROR setting up logging: {e}", file=sys.stderr)
+        # Fallback basic config to console if setup fails
+        logging.basicConfig(
+            level=args.log_level.upper(), format="%(asctime)s - %(levelname)s - %(message)s"
+        )
+        logging.error(f"Failed to configure logging via utility: {e}", exc_info=True)
+        # Decide if you want to exit if logging fails
+        # sys.exit(1)
 
     # --- Define Standardized Filenames ---
     raw_filename = "raw_data.csv"
@@ -205,10 +249,15 @@ if __name__ == "__main__":
 
     # --- Load Raw Data ---
     try:
-        raw_df = pd.read_csv(raw_filepath, index_col=0, delimiter='|')  # Specify pipe delimiter
-        # Ensure index is datetime for filtering
-        raw_df.index = pd.to_datetime(raw_df.index, format='%Y-%m-%d')  # Specify date format explicitly
+        # Read raw data assuming 'date' and 'tic' are columns (as saved by fetch_data)
+        raw_df = pd.read_csv(raw_filepath)
+        raw_df['date'] = pd.to_datetime(raw_df['date']) # Ensure date is datetime
         logging.info(f"Loaded raw data from {raw_filepath}. Shape: {raw_df.shape}")
+        # Check if 'vix' column exists
+        if 'vix' not in raw_df.columns:
+             logging.warning("VIX column not found in raw_data.csv. Ensure fetch_data includes it.")
+        else:
+             logging.info("VIX column found in raw_data.csv.")
     except FileNotFoundError:
         logging.error(f"Raw data file not found: {raw_filepath}. Run the fetch script first.")
         sys.exit(1)
@@ -228,13 +277,16 @@ if __name__ == "__main__":
     try:
         # Convert end_date_to_use to Timestamp for comparison (handle potential errors)
         end_date_ts = pd.Timestamp(end_date_to_use)
-        filtered_df = raw_df[raw_df.index <= end_date_ts].copy()
+        filtered_df = raw_df[raw_df['date'] <= end_date_ts].copy()
         logging.info(f"Filtered data up to {end_date_to_use}. Shape after filtering: {filtered_df.shape}")
         if filtered_df.empty:
             logging.warning(f"Dataframe is empty after filtering by end date {end_date_to_use}. Check date range and data.")
     except ValueError:
          logging.error(f"Invalid date format provided for --train-end-date: '{args.train_end_date}'. Use YYYY-MM-DD.")
          sys.exit(1)
+    except KeyError:
+        logging.error(f"Column 'date' not found for filtering. Columns: {raw_df.columns.tolist()}")
+        sys.exit(1)
     except Exception as e:
         logging.error(f"Error filtering DataFrame by date: {e}")
         sys.exit(1)
@@ -242,12 +294,21 @@ if __name__ == "__main__":
 
     # --- Preprocess Filtered Data ---
     if not filtered_df.empty:
+        # Set 'date' as index before preprocessing if it's not already
+        if not isinstance(filtered_df.index, pd.DatetimeIndex):
+            try:
+                filtered_df = filtered_df.set_index('date')
+            except KeyError:
+                 logging.error("Could not set 'date' as index before preprocessing.")
+                 sys.exit(1)
+
         processed_df = preprocess_data(filtered_df, is_live_trading=False) # Always False when run as script
 
         if processed_df is not None and not processed_df.empty:
             # --- Save Processed Data ---
             try:
-                processed_df.to_csv(processed_filepath, index=False) # index=False as preprocess_data adds 'date' column
+                # preprocess_data now returns df with 'date' as a column, index is numerical
+                processed_df.to_csv(processed_filepath, index=False)
                 logging.info(f"Processed data saved to {processed_filepath}")
                 logging.info(f"Final processed data range: {processed_df['date'].min()} to {processed_df['date'].max()}")
             except Exception as e:

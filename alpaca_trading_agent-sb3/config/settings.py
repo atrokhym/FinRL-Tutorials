@@ -12,8 +12,11 @@ ALPACA_API_BASE_URL = os.getenv('ALPACA_API_BASE_URL', 'https://paper-api.alpaca
 DATA_SOURCE = 'alpaca'
 
 # Trading Parameters
-TECH_TICKERS = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'NVDA', 'TSLA', 'INTC', 'CSCO', 'ADBE']
+# TECH_TICKERS = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'NVDA', 'TSLA', 'INTC', 'CSCO', 'ADBE']
+TECH_TICKERS = ['AAPL', 'MSFT', 'AMZN', 'GOOGL', 'META', 'TSLA', 'NVDA', 'AVGO', 'ADBE', 'NFLX']
+
 TICKERS = TECH_TICKERS  # Use all tickers by default
+VIX_TICKER = '^VIX'     # Ticker for the VIX index (Yahoo Finance)
 
 # Technical Indicators (compatible with stockstats library)
 INDICATORS = [
@@ -21,22 +24,37 @@ INDICATORS = [
     'macd', 'rsi_14', 'cci_14', 'boll_ub', 'boll_lb'  # Standard Technical Indicators
     # 'turbulence' indicator is calculated separately in preprocess_data.py
 ]
-INDICATORS_WITH_TURBULENCE = INDICATORS + ['turbulence'] # Define a list including turbulence
+INDICATORS_WITH_TURBULENCE = INDICATORS + ['turbulence', 'vix'] # Define a list including turbulence and VIX
 
 TIME_INTERVAL = '1D'  # Maps to Alpaca timeframe
 
-# Training/Testing/Validation Periods
-TRAIN_START_DATE = "2015-01-01"
-TRAIN_END_DATE = "2020-12-31"      # Shortened to make room for validation
+# # Training/Testing/Validation Periods
+# TRAIN_START_DATE = "2015-01-01"
+# TRAIN_END_DATE = "2020-12-31"      # Shortened to make room for validation
+# VALIDATION_START_DATE = "2021-01-01"
+# VALIDATION_END_DATE = "2022-12-31" # Your original train end date
+# TEST_START_DATE = "2023-01-01"     # Unchanged
+# TEST_END_DATE = "2024-12-31"       # Unchanged
 
-VALIDATION_START_DATE = "2021-01-01"
-VALIDATION_END_DATE = "2022-12-31" # Your original train end date
+# # horrible performance
+# TRAIN_START_DATE = '2015-01-01'
+# TRAIN_END_DATE = '2022-12-31'
+# VALIDATION_START_DATE = '2023-01-01'
+# VALIDATION_END_DATE = '2023-12-31'
+# TEST_START_DATE = '2024-01-01'
+# TEST_END_DATE = '2025-04-15' # Or your latest data point
 
-TEST_START_DATE = "2023-01-01"     # Unchanged
-TEST_END_DATE = "2024-12-31"       # Unchanged
+TRAIN_START_DATE = '2015-01-01'
+TRAIN_END_DATE = '2021-12-31'
+VALIDATION_START_DATE = '2022-01-01'
+VALIDATION_END_DATE = '2022-12-31'
+TEST_START_DATE = '2023-01-01'
+TEST_END_DATE = '2025-04-15' # Or your latest data point
+
+
 
 # Paper Trading Period
-PAPER_TRADE_START_DATE = "2025-01-01"
+#PAPER_TRADE_START_DATE = "2025-01-01"
 
 # Model paths
 TRAINED_MODEL_DIR = './models/papertrading_alpaca_erl'

@@ -26,7 +26,20 @@ import sys
 sys.path.insert(0, CONFIG_DIR)
 sys.path.insert(0, SRC_DIR) # Add src directory itself for utils and environment
 # Logging setup will be done explicitly using the shared utility
-from utils.logging_setup import configure_file_logging
+try:
+    # Import both functions now
+    from utils.logging_setup import configure_file_logging, add_console_logging
+except ImportError:
+     # Fallback if the utility somehow isn't found
+    logging.basicConfig(
+        level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s"
+    )
+    logging.error(
+        "Failed to import logging setup functions from src.utils. Cannot configure logging."
+    )
+    # Define dummy functions to prevent NameErrors later if import fails
+    def configure_file_logging(level): pass
+    def add_console_logging(level): pass
 # Keep import of custom callback file, but don't use the callback itself
 from utils.custom_callbacks import TensorboardCallback
 
@@ -59,7 +72,20 @@ def train_model(total_timesteps: int, model_suffix: str = "", log_level: str = "
         hyperparams_path (str): Path to hyperparameter JSON file. Defaults to "".
     """
     # --- Configure Logging for this script ---
-    configure_file_logging(log_level)
+    try:
+        configure_file_logging(log_level)
+        add_console_logging(log_level) # ADDED THIS CALL
+        logging.info(f"--- Training Script Logging Initialized (Level: {log_level.upper()}) ---")
+    except Exception as e:
+        # Use basic print if logging setup itself fails
+        print(f"ERROR setting up logging: {e}", file=sys.stderr)
+        # Fallback basic config to console if setup fails
+        logging.basicConfig(
+            level=log_level.upper(), format="%(asctime)s - %(levelname)s - %(message)s"
+        )
+        logging.error(f"Failed to configure logging via utility: {e}", exc_info=True)
+        # sys.exit(1) # Optionally exit
+
 
     # --- Seed for Reproducibility ---
     SEED = 42  # Or load from settings.py if preferred
@@ -237,37 +263,37 @@ def train_model(total_timesteps: int, model_suffix: str = "", log_level: str = "
     try:
         log_interval_freq = 1 # Log frequently to TensorBoard
         logging.info(f"Setting model.learn log_interval to: {log_interval_freq}")
-        
+
         # Create a custom callback that directly logs the metrics we want
         class DirectLoggingCallback(BaseCallback):
             def __init__(self, verbose=0):
                 super().__init__(verbose)
-            
+
             def _on_step(self) -> bool:
                 return True
-            
+
             def _on_rollout_end(self) -> bool:
                 # Get the losses directly from the model
                 if hasattr(self.model, 'logger') and hasattr(self.model.logger, 'name_to_value'):
                     values = self.model.logger.name_to_value
-                    
+
                     # Log policy loss
                     if 'train/policy_gradient_loss' in values:
                         self.logger.record("train/policy_loss", values['train/policy_gradient_loss'])
-                    
+
                     # Log value loss
                     if 'train/value_loss' in values:
                         self.logger.record("train/value_loss", values['train/value_loss'])
-                    
+
                     # Log entropy loss
                     if 'train/entropy_loss' in values:
                         self.logger.record("train/entropy_loss", values['train/entropy_loss'])
-                
+
                 return True
-        
+
         # Use the direct logging callback
         direct_callback = DirectLoggingCallback(verbose=1)
-        
+
         model.learn(
             total_timesteps=total_timesteps,
             log_interval=log_interval_freq,

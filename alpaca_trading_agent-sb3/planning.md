@@ -61,3 +61,31 @@ This file tracks the planned improvements for the `alpaca_trading_agent` project
 *   Order Execution Logic (Limit Orders, Market Impact Models)
 *   Ensemble Methods (Combining multiple models/strategies)
 *   Further Environment Improvements (e.g., more sophisticated state, reward shaping, market regime features)
+
+**Phase 5: Integrate VIX Index Feature**
+
+*   **Objective:** Add the VIX index as an input feature to the RL agent to potentially improve its understanding of market-wide risk and sentiment.
+*   **Steps:**
+    1.  **Update Configuration (`config/settings.py`):**
+        *   Add `VIX_TICKER = '^VIX'`.
+        *   Modify `INDICATORS_WITH_TURBULENCE` to include `'vix'`.
+        *   Verify `STATE_SPACE` calculation uses the new length.
+    2.  **Update Data Fetcher (`src/data_fetcher/fetch_data.py`):**
+        *   Import `yfinance`.
+        *   Fetch VIX data using `yf.download(settings.VIX_TICKER, ...)`.
+        *   Select 'Adj Close', rename to 'vix'.
+        *   Merge 'vix' column into the main `combined_df` using a left merge on the index.
+        *   Forward-fill the 'vix' column after merging.
+        *   Ensure failure to fetch VIX causes the script to exit.
+    3.  **Update Preprocessor (`src/preprocessing/preprocess_data.py`):**
+        *   Confirm 'vix' column is present after loading `raw_df`.
+        *   Ensure existing `ffill()` handles NaNs in 'vix'.
+        *   Verify 'vix' is included in the final feature set (check logging).
+    4.  **Verify Environment (`src/environment/trading_env.py`):**
+        *   Confirm `self.state_space_dim` uses the updated `settings.STATE_SPACE`.
+        *   Confirm `self.tech_indicator_list` includes `'vix'`.
+        *   Verify `_initiate_state` includes VIX data in the `state` array and length checks pass.
+    5.  **Re-run Full Pipeline & Evaluate:**
+        *   Delete old `data/*.csv` files.
+        *   Run `fetch`, `preprocess`, `tune`, `train`, `backtest`, `walkforward`.
+        *   Compare results (Sharpe, return, drawdown) with and without VIX.

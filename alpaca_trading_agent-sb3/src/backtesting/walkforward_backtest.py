@@ -56,9 +56,38 @@ parser.add_argument(
 args = parser.parse_args()
 
 # Logging setup will be done explicitly using the shared utility
-from utils.logging_setup import configure_file_logging
+# Add src to sys.path to find utils
+sys.path.insert(0, SRC_DIR)
+try:
+    # Import both functions now
+    from utils.logging_setup import configure_file_logging, add_console_logging
+except ImportError:
+     # Fallback if the utility somehow isn't found
+    logging.basicConfig(
+        level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s"
+    )
+    logging.error(
+        "Failed to import logging setup functions from src.utils. Cannot configure logging."
+    )
+    # Define dummy functions to prevent NameErrors later if import fails
+    def configure_file_logging(level): pass
+    def add_console_logging(level): pass
 
-configure_file_logging(args.log_level)  # Configure logging based on argument
+# --- Configure Logging for this script ---
+try:
+    configure_file_logging(args.log_level)  # Configure logging based on argument
+    add_console_logging(args.log_level) # ADDED THIS CALL
+    logging.info(f"--- Walk-Forward Script Logging Initialized (Level: {args.log_level.upper()}) ---")
+except Exception as e:
+    # Use basic print if logging setup itself fails
+    print(f"ERROR setting up logging: {e}", file=sys.stderr)
+    # Fallback basic config to console if setup fails
+    logging.basicConfig(
+        level=args.log_level.upper(), format="%(asctime)s - %(levelname)s - %(message)s"
+    )
+    logging.error(f"Failed to configure logging via utility: {e}", exc_info=True)
+    # sys.exit(1) # Optionally exit
+
 # Matplotlib log level is also set by the caller.
 
 
@@ -96,19 +125,15 @@ def run_main_mode(
 
     try:
         command = [sys.executable, MAIN_SCRIPT, mode, "--log-level", log_level_str]
-        logging.debug(f"Running command: {' '.join(command)} with overrides")
-        result = subprocess.run(
-            command, check=True, capture_output=True, text=True, env=temp_env
-        )
+        # Pass --skip-tuning flag to walkforward mode if set
+        if mode == 'walkforward' and args.skip_tuning:
+             command.append('--skip-tuning')
 
-        # Log output (consider logging DEBUG output only at DEBUG level)
-        if args.log_level == "DEBUG":
-            logging.debug(f"Script Output:\n{result.stdout}")
-            if result.stderr:
-                logging.debug(f"Script Error Output:\n{result.stderr}")
-        else:
-            # For INFO level, maybe log just the last few lines or specific markers
-            pass
+        logging.debug(f"Running command: {' '.join(command)} with overrides")
+        # Changed: Allow output to stream directly, don't capture
+        result = subprocess.run(
+            command, check=True, text=True, env=temp_env # Removed capture_output=True
+        )
 
         logging.info(
             f"--- Successfully finished main.py mode: {mode} {model_suffix} ---"
@@ -120,8 +145,10 @@ def run_main_mode(
     except subprocess.CalledProcessError as e:
         logging.error(f"Error executing main.py mode {mode}:")
         logging.error(f"Return Code: {e.returncode}")
-        logging.error(f"Output:\n{e.stdout}")
-        logging.error(f"Error Output:\n{e.stderr}")
+        # Output/Error is streamed, so not captured in e.stdout/e.stderr
+        # logging.error(f"Output:\n{e.stdout}") # No longer available
+        # logging.error(f"Error Output:\n{e.stderr}") # No longer available
+        logging.error(f"Check console/log file for detailed output from the failed script.")
         return False
     except Exception as e:
         logging.error(
@@ -293,7 +320,11 @@ def perform_walk_forward():
                 if len(parts) >= 2:
                     metric_name = " ".join(parts[:-1]).strip()
                     try:
-                        metric_value = float(parts[-1])
+                        # Handle percentage values
+                        if parts[-1].endswith('%'):
+                            metric_value = float(parts[-1].strip('%')) / 100.0
+                        else:
+                            metric_value = float(parts[-1])
                     except ValueError:
                         metric_value = parts[
                             -1
@@ -346,29 +377,13 @@ def perform_walk_forward():
             f"Results DataFrame before summary calculation:\n{results_df.to_string()}"
         )
 
-        # Explicitly define numeric columns to average (excluding Skew/Kurtosis which are NaN)
-        numeric_cols_to_average = [
-            "Annual return",
-            "Cumulative returns",
-            "Annual volatility",
-            "Sharpe ratio",
-            "Calmar ratio",
-            "Stability",
-            "Max drawdown",
-            "Omega ratio",
-            "Sortino ratio",
-            "Tail ratio",
-            "Daily value at risk",
-        ]
-        # Check which of these columns actually exist in the DataFrame
-        existing_numeric_cols = [
-            col for col in numeric_cols_to_average if col in results_df.columns
-        ]
-        logging.info(f"Attempting to average columns: {existing_numeric_cols}")
+        # Select only numeric columns for averaging (excluding dates and potentially 'Skew', 'Kurtosis' if non-numeric)
+        numeric_cols = results_df.select_dtypes(include=np.number).columns
+        logging.info(f"Attempting to average numeric columns: {numeric_cols.tolist()}")
 
-        if existing_numeric_cols:
-            # Calculate mean only for existing numeric columns
-            summary = results_df[existing_numeric_cols].mean()
+
+        if not numeric_cols.empty:
+            summary = results_df[numeric_cols].mean()
             logging.info("Successfully calculated mean summary.")
             logging.info(
                 f"Calculated Summary Series:\n{summary.to_string()}"

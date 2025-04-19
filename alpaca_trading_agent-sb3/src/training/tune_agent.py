@@ -57,7 +57,21 @@ sys.path.insert(0, SRC_DIR)  # Add src directory to path for environment and uti
 # sys.path.insert(0, os.path.join(SRC_DIR, 'utils')) # No longer needed separately
 
 # Logging setup will be done explicitly using the shared utility
-from utils.logging_setup import configure_file_logging
+try:
+    # Import both functions now
+    from utils.logging_setup import configure_file_logging, add_console_logging
+except ImportError:
+     # Fallback if the utility somehow isn't found
+    logging.basicConfig(
+        level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s"
+    )
+    logging.error(
+        "Failed to import logging setup functions from src.utils. Cannot configure logging."
+    )
+    # Define dummy functions to prevent NameErrors later if import fails
+    def configure_file_logging(level): pass
+    def add_console_logging(level): pass
+
 # Import the custom callback
 from utils.custom_callbacks import TensorboardCallback
 
@@ -299,7 +313,7 @@ def objective(trial: optuna.Trial) -> float:
         truncated = False
         total_reward_validation = 0.0
         account_value_validation = env_validation.initial_amount
-    
+
         while not (terminated or truncated):
             action, _states = model.predict(obs, deterministic=True)
             obs, reward, terminated, truncated, info = env_validation.step(action)
@@ -316,11 +330,11 @@ def objective(trial: optuna.Trial) -> float:
                         "total_asset", env_validation.initial_amount
                     )  # Use info if available
                 break
-    
+
         logging.info(
             f"Trial {trial.number}: Validation finished. Final Account Value: {account_value_validation:.2f}"
         )
-    
+
     except Exception as e:
         logging.exception(
             f"Trial {trial.number}: Error during validation."
@@ -358,7 +372,20 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # --- Configure Logging for this script ---
-    configure_file_logging(args.log_level)
+    try:
+        configure_file_logging(args.log_level)
+        add_console_logging(args.log_level) # ADDED THIS CALL
+        logging.info(f"--- Tuning Script Logging Initialized (Level: {args.log_level.upper()}) ---")
+    except Exception as e:
+        # Use basic print if logging setup itself fails
+        print(f"ERROR setting up logging: {e}", file=sys.stderr)
+        # Fallback basic config to console if setup fails
+        logging.basicConfig(
+            level=args.log_level.upper(), format="%(asctime)s - %(levelname)s - %(message)s"
+        )
+        logging.error(f"Failed to configure logging via utility: {e}", exc_info=True)
+        # sys.exit(1) # Optionally exit
+
     logging.info(f"--- Starting Tuning Script (PID: {os.getpid()}) ---")
     # Check for Walk-Forward model suffix
     model_suffix = os.environ.get("WF_MODEL_SUFFIX", "")

@@ -22,7 +22,7 @@ import pyfolio
 from alpaca_trading_agent.config import settings as config # This should work now
 from finrl.plot import backtest_stats, backtest_plot, get_daily_return
 import matplotlib.pyplot as plt
-
+import matplotlib.ticker as mtick # For formatting y-axis as percentage
 # --- Configuration and Path Setup (Simplified as PROJECT_ROOT is defined above) ---
 # PROJECT_ROOT is already defined
 CONFIG_DIR = os.path.join(PROJECT_ROOT, "config")
@@ -51,7 +51,20 @@ parser.add_argument(
 
 # Logging setup will be done explicitly using the shared utility
 # Moved the import here as 'utils' should be findable via SRC_DIR in sys.path
-from utils.logging_setup import configure_file_logging
+try:
+    # Import both functions now
+    from utils.logging_setup import configure_file_logging, add_console_logging
+except ImportError:
+     # Fallback if the utility somehow isn't found
+    logging.basicConfig(
+        level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s"
+    )
+    logging.error(
+        "Failed to import logging setup functions from src.utils. Cannot configure logging."
+    )
+    # Define dummy functions to prevent NameErrors later if import fails
+    def configure_file_logging(level): pass
+    def add_console_logging(level): pass
 
 # --- Load Configuration Settings ---
 # The 'from alpaca_trading_agent.config import settings as config' at the top should handle this.
@@ -67,8 +80,20 @@ parser.add_argument(
 )
 args = parser.parse_args()
 # --- Configure Logging for this script ---
-configure_file_logging(args.log_level) # Ensure file logging is configured
-# Note: Console logging is not added here by default.
+try:
+    configure_file_logging(args.log_level) # Ensure file logging is configured
+    add_console_logging(args.log_level) # ADDED THIS CALL
+    logging.info(f"--- Backtesting Script Logging Initialized (Level: {args.log_level.upper()}) ---")
+except Exception as e:
+    # Use basic print if logging setup itself fails
+    print(f"ERROR setting up logging: {e}", file=sys.stderr)
+    # Fallback basic config to console if setup fails
+    logging.basicConfig(
+        level=args.log_level.upper(), format="%(asctime)s - %(levelname)s - %(message)s"
+    )
+    logging.error(f"Failed to configure logging via utility: {e}", exc_info=True)
+    # sys.exit(1) # Optionally exit
+
 
 # --- Seed for Reproducibility ---
 SEED = 42  # Or load from settings.py if preferred
@@ -304,7 +329,7 @@ while not (terminated or truncated):
         break
 
 
-# --- Add Plotting Function ---
+# --- Plotting Functions ---
 def plot_account_value(df, save_path):
     """Plots account value over time and saves the figure."""
     try:
@@ -344,6 +369,43 @@ def plot_stock_prices(df, tickers, save_path):
     except Exception as e:
         logging.error(f"Error generating stock prices plot: {e}", exc_info=True)
 
+# --- Add Cumulative Returns Comparison Plot Function ---
+def plot_cumulative_returns_comparison(agent_returns, baseline_returns, save_path):
+    """Plots agent cumulative return vs. baseline cumulative return."""
+    try:
+        plt.figure(figsize=(15, 7))
+
+        # Ensure both indices are timezone-naive before calculating cumulative product
+        if agent_returns.index.tz is not None:
+            agent_returns.index = agent_returns.index.tz_localize(None)
+        if baseline_returns.index.tz is not None:
+            baseline_returns.index = baseline_returns.index.tz_localize(None)
+
+        # Calculate cumulative returns (ensure both start at 1)
+        agent_cumulative = (1 + agent_returns).cumprod()
+        baseline_cumulative = (1 + baseline_returns).cumprod()
+
+        # Align indices if necessary (though they should align if derived from same test_df dates)
+        agent_cumulative, baseline_cumulative = agent_cumulative.align(baseline_cumulative, join='inner')
+
+
+        plt.plot(agent_cumulative.index, agent_cumulative, label="Agent Strategy")
+        plt.plot(baseline_cumulative.index, baseline_cumulative, label="Equal-Weighted Baseline", linestyle='--')
+
+        plt.title("Agent Cumulative Return vs Equal-Weighted Baseline")
+        plt.xlabel("Date")
+        plt.ylabel("Cumulative Return (1 = Initial Value)")
+        plt.yscale('log') # Use log scale for better visualization of long-term growth
+        plt.legend()
+        plt.grid(True, which="both", ls="--", linewidth=0.5) # Grid for both major and minor ticks on log scale
+        plt.tight_layout()
+        plt.savefig(save_path)
+        plt.close()
+        logging.info(f"Cumulative returns comparison plot saved to: {save_path}")
+
+    except Exception as e:
+        # Ensure exc_info=True is used for detailed traceback
+        logging.error(f"Error generating cumulative returns comparison plot: {e}", exc_info=True)
 
 # --- Performance Analysis ---
 logging.info("Calculating performance metrics...")
@@ -417,7 +479,36 @@ account_value_df_for_finrl = account_value_df.reset_index()
 
 # get_daily_return returns a Series with DatetimeIndex
 daily_returns_series = get_daily_return(account_value_df_for_finrl)
-daily_returns_series.name = "Daily Return"  # Rename for Pyfolio
+daily_returns_series.name = "Agent Return"  # Rename for clarity
+
+# --- Calculate Equal-Weighted Baseline Returns ---
+logging.info("Calculating equal-weighted baseline returns...")
+try:
+    # Pivot the test data to get closing prices per ticker
+    pivot_df = test_df.pivot(index='date', columns='tic', values='close')
+    # Calculate daily returns for each stock
+    stock_returns = pivot_df.pct_change().dropna()
+    # Calculate the mean return across stocks for each day (equal weight)
+    equal_weighted_returns = stock_returns.mean(axis=1)
+    equal_weighted_returns.name = "Equal Weighted Baseline"
+    logging.info("Successfully calculated equal-weighted baseline returns.")
+except Exception as e:
+    # Ensure exc_info=True is used for detailed traceback
+    logging.error(f"Error calculating equal-weighted baseline: {e}", exc_info=True)
+    equal_weighted_returns = None # Set to None if calculation fails
+# --- Plot Cumulative Returns Comparison ---
+# Add logging to check status before the if condition
+logging.info(f"Checking conditions for comparison plot: daily_returns_series is None? {daily_returns_series is None}, equal_weighted_returns is None? {equal_weighted_returns is None}")
+if daily_returns_series is not None and equal_weighted_returns is not None:
+    logging.info("Conditions met. Attempting to generate cumulative returns comparison plot...")
+    comparison_plot_path = os.path.join(
+        BACKTEST_RESULTS_DIR, f"{MODEL_FILENAME_BASE}_cumulative_returns_comparison.png"
+    )
+    plot_cumulative_returns_comparison(
+        daily_returns_series, equal_weighted_returns, comparison_plot_path
+    )
+else:
+    logging.warning("Skipping cumulative returns comparison plot due to missing data.")
 
 # --- Generate Pyfolio Report ---
 logging.info("Generating Pyfolio tearsheet...")
@@ -456,6 +547,7 @@ try:
         "Skipping backtest_plot due to dependency version conflicts (pyfolio/pandas/numpy)."
     )
 
+
     # --- Calculate and Save Stats (with detailed logging) ---
     stats_str = None # Initialize
     try:
@@ -473,64 +565,67 @@ try:
     if stats_str is not None:
         try:
             logging.info("Attempting to save backtest statistics to file...")
-            stats_filename = (
-                f"{MODEL_FILENAME_BASE}_backtest_stats.txt"  # Base already includes suffix
+            stats_path = os.path.join(
+                BACKTEST_RESULTS_DIR, f"{MODEL_FILENAME_BASE}_backtest_stats.txt"
             )
-            stats_path = os.path.join(BACKTEST_RESULTS_DIR, stats_filename)
             with open(stats_path, "w") as f:
-                f.write(stats_str.to_string())  # Convert Series to string before writing
-            logging.info(f"Successfully saved backtest stats to {stats_path}")
+                # Convert Series to string before writing
+                f.write(stats_str.to_string())
+            logging.info(f"Backtest statistics saved to: {stats_path}")
         except Exception as e_save:
-            logging.error(f"ERROR saving backtest stats to file {stats_path}: {e_save}", exc_info=True)
-    else:
-        logging.warning("Skipping saving stats file because stats calculation failed.")
-    # --- End Calculate and Save Stats ---
+            logging.error(f"ERROR saving backtest statistics: {e_save}", exc_info=True)
 
+except Exception as e_pyfolio:
+    logging.error(f"Error during Pyfolio/Stats generation: {e_pyfolio}", exc_info=True)
 
-    # Optional: Try generating full pyfolio report if possible (might need adjustments)
-    # import matplotlib.pyplot as plt
-    # fig = pyfolio.create_full_tear_sheet(
-    #     returns=daily_returns_series, # Pass the Series directly
-    #     # benchmark_rets=benchmark_rets, # Add benchmark returns if available
-    #     set_context=False, # Avoid issues in non-notebook environments
-    #     round_trips=False # May need transaction data for round trips
-    # )
-    # # Save the figure generated by pyfolio
-    # fig_path = os.path.join(BACKTEST_RESULTS_DIR, f"{MODEL_FILENAME_BASE}_pyfolio_figure.png")
-    # fig.savefig(fig_path)
-    # plt.close(fig) # Close the plot figure
-    # logging.info(f"Pyfolio figure saved to {fig_path}")
+# --- Save Raw Results ---
+logging.info("Saving raw backtesting results...")
+try:
+    # Save account values
+    account_values_path = os.path.join(
+        BACKTEST_RESULTS_DIR, f"{MODEL_FILENAME_BASE}_account_values.csv"
+    )
+    account_value_df.to_csv(account_values_path)
+    logging.info(f"Account values saved to: {account_values_path}")
+
+    # Save actions (optional, can be large)
+    # actions_df = pd.DataFrame(actions_list, columns=[f"action_{t}" for t in tickers])
+    # actions_path = os.path.join(BACKTEST_RESULTS_DIR, f"{MODEL_FILENAME_BASE}_actions.csv")
+    # actions_df.to_csv(actions_path, index=False)
+    # logging.info(f"Actions saved to: {actions_path}")
+
+    # Save daily returns
+    returns_path = os.path.join(
+        BACKTEST_RESULTS_DIR, f"{MODEL_FILENAME_BASE}_daily_returns.csv"
+    )
+    daily_returns_series.to_csv(returns_path, header=True)
+    logging.info(f"Daily returns saved to: {returns_path}")
+
+    # Save baseline returns if calculated
+    if equal_weighted_returns is not None:
+        baseline_returns_path = os.path.join(
+            BACKTEST_RESULTS_DIR, f"{MODEL_FILENAME_BASE}_baseline_daily_returns.csv"
+        )
+        equal_weighted_returns.to_csv(baseline_returns_path, header=True)
+        logging.info(f"Baseline daily returns saved to: {baseline_returns_path}")
 
 
 except Exception as e:
-    logging.error(
-        f"Error during Pyfolio report generation or saving stats: {e}", exc_info=True
-    )
+    logging.error(f"Error saving raw backtesting results: {e}", exc_info=True)
 
-# --- Generate and Save Matplotlib Plots (using potentially suffixed names) ---
-plot_filename = (
-    f"{MODEL_FILENAME_BASE}_account_value_plot.png"  # Base already includes suffix
+# --- Generate Plots ---
+logging.info("Generating additional plots...")
+# Plot Account Value
+plot_account_value_path = os.path.join(
+    BACKTEST_RESULTS_DIR, f"{MODEL_FILENAME_BASE}_account_value_plot.png"
 )
-plot_save_path = os.path.join(BACKTEST_RESULTS_DIR, plot_filename)
-plot_account_value(
-    account_value_df, plot_save_path
-)  # Call the account value plot function
+plot_account_value(account_value_df, plot_account_value_path)
 
-prices_plot_filename = (
-    f"{MODEL_FILENAME_BASE}_stock_prices_plot.png"  # Base already includes suffix
+# Plot Stock Prices during the test period
+plot_prices_path = os.path.join(
+    BACKTEST_RESULTS_DIR, f"{MODEL_FILENAME_BASE}_stock_prices_plot.png"
 )
-prices_plot_save_path = os.path.join(BACKTEST_RESULTS_DIR, prices_plot_filename)
-# We need the original test_df and the list of tickers
-plot_stock_prices(
-    test_df, tickers, prices_plot_save_path
-)  # Call the new stock prices plot function
+plot_stock_prices(test_df, tickers, plot_prices_path)
 
-# --- Save Results (using potentially suffixed name) ---
-results_filename = (
-    f"{MODEL_FILENAME_BASE}_account_values.csv"  # Base already includes suffix
-)
-results_df_path = os.path.join(BACKTEST_RESULTS_DIR, results_filename)
-account_value_df.to_csv(results_df_path)
-logging.info(f"Account values saved to {results_df_path}")
 
-logging.info("--- Backtesting Script Finished ---")
+logging.info("--- Backtesting script finished. ---")
